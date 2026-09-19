@@ -1,0 +1,912 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Home,
+  ShieldCheck,
+  Calendar,
+  RefreshCw,
+  AlertCircle,
+  Pencil,
+  X,
+  Save,
+  Lock,
+} from "lucide-react";
+
+function AdminProfile() {
+  const [admin, setAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    village: "",
+    address: "",
+    profileImage: "",
+    password: "",
+  });
+
+  const fetchAdminProfile = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        "http://localhost:3003/api/admin/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setAdmin(response.data.admin);
+      }
+    } catch (error) {
+      console.log("Admin profile loading error:", error);
+
+      setError(
+        error.response?.data?.message ||
+          error.response?.data?.msg ||
+          "Failed to load admin profile."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminProfile();
+  }, []);
+
+  const handleOpenEdit = () => {
+    setSuccessMessage("");
+
+    setFormData({
+      name: admin.name || "",
+      email: admin.email || "",
+      phone: admin.phone || "",
+      village: admin.village || "",
+      address: admin.address || "",
+      profileImage: admin.profileImage || "",
+      password: "",
+    });
+
+    setEditOpen(true);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+
+    try {
+      setSaving(true);
+      setError("");
+      setSuccessMessage("");
+
+      const token = localStorage.getItem("token");
+
+      const updateData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        village: formData.village,
+        address: formData.address,
+        profileImage: formData.profileImage,
+      };
+
+      if (formData.password.trim() !== "") {
+        updateData.password = formData.password;
+      }
+
+      const response = await axios.patch(
+        "http://localhost:3003/api/admin/profile",
+        updateData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.user) {
+        setAdmin(response.data.user);
+      }
+
+      setEditOpen(false);
+
+      setSuccessMessage(
+        response.data.msg ||
+          "Admin profile updated successfully."
+      );
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 4000);
+
+    } catch (error) {
+      console.log("Admin profile update error:", error);
+
+      setError(
+        error.response?.data?.msg ||
+          error.response?.data?.message ||
+          "Failed to update admin profile."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "—";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+
+        <div className="flex flex-col items-center gap-4">
+
+          <RefreshCw
+            size={32}
+            className="animate-spin text-primary"
+          />
+
+          <p className="text-sm text-muted">
+            Loading admin profile...
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  if (error && !admin) {
+    return (
+      <div className="mx-auto max-w-5xl">
+
+        <div className="rounded-3xl border border-red-200 bg-red-50 p-6">
+
+          <div className="flex items-center gap-3">
+
+            <AlertCircle
+              size={22}
+              className="text-red-600"
+            />
+
+            <div>
+
+              <h2 className="font-semibold text-red-700">
+                Unable to load profile
+              </h2>
+
+              <p className="mt-1 text-sm text-red-600">
+                {error}
+              </p>
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={fetchAdminProfile}
+            className="mt-5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+          >
+            Try Again
+          </button>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  if (!admin) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+
+        <p className="text-muted">
+          Admin profile not found.
+        </p>
+
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl">
+
+      {}
+      {}
+      {}
+
+      <div className="mb-8">
+
+        <p className="text-sm font-semibold tracking-wide text-primary">
+          ADMINISTRATION
+        </p>
+
+        <h1 className="mt-1 text-3xl font-bold text-text">
+          Admin Profile
+        </h1>
+
+        <p className="mt-2 text-muted">
+          Manage and view your administrator account information.
+        </p>
+
+      </div>
+
+
+      {}
+
+      {successMessage && (
+
+        <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-medium text-green-700">
+
+          {successMessage}
+
+        </div>
+
+      )}
+
+
+      {}
+      {}
+      {}
+
+      <div className="overflow-hidden rounded-3xl border border-border bg-card">
+
+        <div className="bg-primary px-6 py-8 sm:px-8">
+
+          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border-4 border-white/20 bg-white/10 text-white">
+
+              {admin.profileImage ? (
+
+                <img
+                  src={admin.profileImage}
+                  alt={admin.name}
+                  className="h-full w-full object-cover"
+                />
+
+              ) : (
+
+                <User size={42} />
+
+              )}
+
+            </div>
+
+
+            <div className="text-center sm:text-left">
+
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center">
+
+                <h2 className="text-2xl font-bold text-white">
+                  {admin.name}
+                </h2>
+
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
+
+                  <ShieldCheck size={15} />
+
+                  Administrator
+
+                </span>
+
+              </div>
+
+              <p className="mt-2 text-sm text-white/80">
+                {admin.email}
+              </p>
+
+              <p className="mt-1 text-sm text-white/70">
+                NeighbourShare Community Administrator
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {}
+        {}
+        {}
+
+        <div className="p-6 sm:p-8">
+
+          <div className="mb-6">
+
+            <h3 className="text-lg font-bold text-text">
+              Personal Information
+            </h3>
+
+            <p className="mt-1 text-sm text-muted">
+              Your account and contact details.
+            </p>
+
+          </div>
+
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            {}
+
+            <div className="rounded-2xl border border-border bg-background p-4">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+
+                  <User size={19} />
+
+                </div>
+
+                <div className="min-w-0">
+
+                  <p className="text-xs text-muted">
+                    Full Name
+                  </p>
+
+                  <p className="mt-1 truncate font-semibold text-text">
+                    {admin.name}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {}
+
+            <div className="rounded-2xl border border-border bg-background p-4">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+
+                  <Mail size={19} />
+
+                </div>
+
+                <div className="min-w-0">
+
+                  <p className="text-xs text-muted">
+                    Email Address
+                  </p>
+
+                  <p className="mt-1 truncate font-semibold text-text">
+                    {admin.email}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {}
+
+            <div className="rounded-2xl border border-border bg-background p-4">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+
+                  <Phone size={19} />
+
+                </div>
+
+                <div>
+
+                  <p className="text-xs text-muted">
+                    Phone Number
+                  </p>
+
+                  <p className="mt-1 font-semibold text-text">
+                    {admin.phone || "Not available"}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {}
+
+            <div className="rounded-2xl border border-border bg-background p-4">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+
+                  <MapPin size={19} />
+
+                </div>
+
+                <div>
+
+                  <p className="text-xs text-muted">
+                    Village
+                  </p>
+
+                  <p className="mt-1 font-semibold text-text">
+                    {admin.village || "Not available"}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {}
+
+            <div className="rounded-2xl border border-border bg-background p-4 sm:col-span-2">
+
+              <div className="flex items-start gap-3">
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+
+                  <Home size={19} />
+
+                </div>
+
+                <div>
+
+                  <p className="text-xs text-muted">
+                    Address
+                  </p>
+
+                  <p className="mt-1 font-semibold text-text">
+                    {admin.address || "Not available"}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {}
+          {}
+          {}
+
+          <div className="mt-8 border-t border-border pt-8">
+
+            <div className="mb-5">
+
+              <h3 className="text-lg font-bold text-text">
+                Account Information
+              </h3>
+
+              <p className="mt-1 text-sm text-muted">
+                Administrator account status and details.
+              </p>
+
+            </div>
+
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+              {}
+
+              <div className="rounded-2xl border border-border bg-card p-4">
+
+                <div className="flex items-center gap-3">
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+
+                    <ShieldCheck size={19} />
+
+                  </div>
+
+                  <div>
+
+                    <p className="text-xs text-muted">
+                      Account Role
+                    </p>
+
+                    <p className="mt-1 font-semibold capitalize text-text">
+                      {admin.role}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {}
+
+              <div className="rounded-2xl border border-border bg-card p-4">
+
+                <div className="flex items-center gap-3">
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-600">
+
+                    <ShieldCheck size={19} />
+
+                  </div>
+
+                  <div>
+
+                    <p className="text-xs text-muted">
+                      Account Status
+                    </p>
+
+                    <p className="mt-1 font-semibold text-green-600">
+                      Verified
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {}
+
+              <div className="rounded-2xl border border-border bg-card p-4">
+
+                <div className="flex items-center gap-3">
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+
+                    <Calendar size={19} />
+
+                  </div>
+
+                  <div>
+
+                    <p className="text-xs text-muted">
+                      Member Since
+                    </p>
+
+                    <p className="mt-1 font-semibold text-text">
+                      {formatDate(admin.createdAt)}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {}
+          {}
+          {}
+
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+
+            <button
+              onClick={fetchAdminProfile}
+              className="flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+            >
+
+              <RefreshCw size={17} />
+
+              Refresh Profile
+
+            </button>
+
+
+            <button
+              onClick={handleOpenEdit}
+              className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+            >
+
+              <Pencil size={17} />
+
+              Edit Profile
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {}
+      {}
+      {}
+
+      {editOpen && (
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-card shadow-xl">
+
+            {}
+
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-5">
+
+              <div>
+
+                <h2 className="text-xl font-bold text-text">
+                  Edit Admin Profile
+                </h2>
+
+                <p className="mt-1 text-sm text-muted">
+                  Update your administrator account information.
+                </p>
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={() => setEditOpen(false)}
+                disabled={saving}
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-muted transition hover:bg-background hover:text-text disabled:opacity-50"
+              >
+
+                <X size={20} />
+
+              </button>
+
+            </div>
+
+
+            {}
+
+            <form
+              onSubmit={handleUpdateProfile}
+              className="p-6"
+            >
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                {}
+
+                <div>
+
+                  <label className="mb-2 block text-sm font-semibold text-text">
+                    Full Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+
+                </div>
+
+
+                {}
+
+                <div>
+
+                  <label className="mb-2 block text-sm font-semibold text-text">
+                    Email Address
+                  </label>
+
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+
+                </div>
+
+
+                {}
+
+                <div>
+
+                  <label className="mb-2 block text-sm font-semibold text-text">
+                    Phone Number
+                  </label>
+
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+
+                </div>
+
+
+                {}
+
+                <div>
+
+                  <label className="mb-2 block text-sm font-semibold text-text">
+                    Village
+                  </label>
+
+                  <input
+                    type="text"
+                    name="village"
+                    value={formData.village}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+
+                </div>
+
+
+                {}
+
+                <div className="sm:col-span-2">
+
+                  <label className="mb-2 block text-sm font-semibold text-text">
+                    Address
+                  </label>
+
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    rows="3"
+                    className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+
+                </div>
+
+
+                {}
+
+                <div className="sm:col-span-2">
+
+                  <label className="mb-2 block text-sm font-semibold text-text">
+                    Profile Image URL
+                  </label>
+
+                  <input
+                    type="text"
+                    name="profileImage"
+                    value={formData.profileImage}
+                    onChange={handleChange}
+                    placeholder="https://example.com/profile-image.jpg"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+
+                </div>
+
+
+                {}
+
+                <div className="sm:col-span-2">
+
+                  <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-text">
+
+                    <Lock size={16} className="text-primary" />
+
+                    New Password
+
+                  </label>
+
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Leave empty to keep your current password"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  />
+
+                  <p className="mt-2 text-xs text-muted">
+                    Leave this field empty if you do not want to change your password.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              {}
+
+              <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
+
+                <button
+                  type="button"
+                  onClick={() => setEditOpen(false)}
+                  disabled={saving}
+                  className="rounded-xl border border-border px-5 py-3 text-sm font-semibold text-text transition hover:bg-background disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
+                >
+
+                  {saving ? (
+
+                    <RefreshCw
+                      size={17}
+                      className="animate-spin"
+                    />
+
+                  ) : (
+
+                    <Save size={17} />
+
+                  )}
+
+                  {saving
+                    ? "Saving..."
+                    : "Save Changes"}
+
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+
+      )}
+
+    </div>
+  );
+}
+
+export default AdminProfile;
