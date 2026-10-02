@@ -37,6 +37,27 @@ function MyItems() {
   const [success, setSuccess] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // ==============================
+  // PAGINATION
+  // ==============================
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 12;
+
+  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const paginatedItems = items.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  // ==============================
+  // FETCH MY ITEMS
+  // ==============================
+
   const fetchMyItems = async () => {
     try {
       setLoading(true);
@@ -67,6 +88,22 @@ function MyItems() {
     fetchMyItems();
   }, []);
 
+  // Reset pagination when items count changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [items.length]);
+
+  // Prevent page from going beyond available pages
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  // ==============================
+  // FORM
+  // ==============================
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -90,6 +127,10 @@ function MyItems() {
     setEditingItem(null);
     setShowAddForm(false);
   };
+
+  // ==============================
+  // ADD ITEM
+  // ==============================
 
   const handleAddItem = async (e) => {
     e.preventDefault();
@@ -137,6 +178,10 @@ function MyItems() {
     }
   };
 
+  // ==============================
+  // EDIT ITEM
+  // ==============================
+
   const handleEdit = (item) => {
     setEditingItem(item);
 
@@ -155,6 +200,10 @@ function MyItems() {
       behavior: "smooth",
     });
   };
+
+  // ==============================
+  // UPDATE ITEM
+  // ==============================
 
   const handleUpdateItem = async (e) => {
     e.preventDefault();
@@ -202,6 +251,10 @@ function MyItems() {
     }
   };
 
+  // ==============================
+  // DELETE ITEM
+  // ==============================
+
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this item?"
@@ -235,6 +288,10 @@ function MyItems() {
     }
   };
 
+  // ==============================
+  // VIEW REVIEWS
+  // ==============================
+
   const handleViewReviews = async (item) => {
     try {
       setReviewLoading(true);
@@ -263,6 +320,10 @@ function MyItems() {
     }
   };
 
+  // ==============================
+  // LOADING
+  // ==============================
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -281,7 +342,6 @@ function MyItems() {
       ====================================== */}
 
       <section className="border-b border-border bg-white">
-
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
@@ -327,9 +387,7 @@ function MyItems() {
           </div>
 
         </div>
-
       </section>
-
 
       {/* ======================================
           MESSAGES
@@ -350,7 +408,6 @@ function MyItems() {
         )}
 
       </div>
-
 
       {/* ======================================
           THREE ITEM REQUIREMENT
@@ -391,7 +448,6 @@ function MyItems() {
         </section>
       )}
 
-
       {/* ======================================
           ADD / EDIT FORM
       ====================================== */}
@@ -429,7 +485,6 @@ function MyItems() {
 
             </div>
 
-
             <form
               onSubmit={
                 editingItem
@@ -439,7 +494,7 @@ function MyItems() {
               className="grid gap-5 md:grid-cols-2"
             >
 
-              {}
+              {/* ITEM TITLE */}
 
               <div>
 
@@ -458,8 +513,7 @@ function MyItems() {
 
               </div>
 
-
-              {}
+              {/* CATEGORY */}
 
               <div>
 
@@ -502,8 +556,7 @@ function MyItems() {
 
               </div>
 
-
-              {}
+              {/* CONDITION */}
 
               <div>
 
@@ -542,8 +595,7 @@ function MyItems() {
 
               </div>
 
-
-              {}
+              {/* IMAGE */}
 
               <div>
 
@@ -562,8 +614,7 @@ function MyItems() {
 
               </div>
 
-
-              {}
+              {/* DESCRIPTION */}
 
               <div className="md:col-span-2">
 
@@ -582,8 +633,7 @@ function MyItems() {
 
               </div>
 
-
-              {}
+              {/* FORM BUTTONS */}
 
               <div className="flex gap-3 md:col-span-2">
 
@@ -620,7 +670,6 @@ function MyItems() {
         </section>
       )}
 
-
       {/* ======================================
           ITEMS
       ====================================== */}
@@ -645,7 +694,6 @@ function MyItems() {
             </div>
 
           </div>
-
 
           {items.length === 0 ? (
 
@@ -678,128 +726,159 @@ function MyItems() {
 
           ) : (
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
-              {items.map((item) => (
+                {paginatedItems.map((item) => (
 
-                <div
-                  key={item._id}
-                  className="overflow-hidden rounded-2xl bg-white shadow-sm"
-                >
+                  <div
+                    key={item._id}
+                    className="overflow-hidden rounded-2xl bg-white shadow-sm"
+                  >
 
-                  {}
+                    {/* IMAGE */}
 
-                  <div className="h-48 overflow-hidden bg-background">
+                    <div className="h-48 overflow-hidden bg-background">
 
-                    {item.image ? (
+                      {item.image ? (
 
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="h-full w-full object-cover"
-                      />
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="h-full w-full object-cover"
+                        />
 
-                    ) : (
+                      ) : (
 
-                      <div className="flex h-full items-center justify-center text-muted">
-                        <Package size={35} />
+                        <div className="flex h-full items-center justify-center text-muted">
+                          <Package size={35} />
+                        </div>
+
+                      )}
+
+                    </div>
+
+                    {/* ITEM CONTENT */}
+
+                    <div className="p-5">
+
+                      <div className="flex items-start justify-between gap-3">
+
+                        <h3 className="font-bold text-text">
+                          {item.title}
+                        </h3>
+
+                        <span
+                          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                            item.availability?.toLowerCase() ===
+                            "available"
+                              ? "bg-green-50 text-green-600"
+                              : "bg-orange-50 text-orange-600"
+                          }`}
+                        >
+                          {item.availability || "Available"}
+                        </span>
+
                       </div>
 
-                    )}
+                      <p className="mt-2 text-sm text-muted">
+                        {item.category}
+                      </p>
 
-                  </div>
+                      <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted">
+                        {item.description}
+                      </p>
 
-
-                  {}
-
-                  <div className="p-5">
-
-                    <div className="flex items-start justify-between gap-3">
-
-                      <h3 className="font-bold text-text">
-                        {item.title}
-                      </h3>
-
-                      <span
-                        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-                          item.availability?.toLowerCase() ===
-                          "available"
-                            ? "bg-green-50 text-green-600"
-                            : "bg-orange-50 text-orange-600"
-                        }`}
-                      >
-                        {item.availability || "Available"}
-                      </span>
-
-                    </div>
-
-
-                    <p className="mt-2 text-sm text-muted">
-                      {item.category}
-                    </p>
-
-
-                    <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted">
-                      {item.description}
-                    </p>
-
-
-                    {}
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleViewReviews(item)
-                      }
-                      className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/10"
-                    >
-                      <MessageSquare size={16} />
-                      View Reviews
-                    </button>
-
-
-                    {}
-
-                    <div className="mt-3 flex gap-2">
+                      {/* VIEW REVIEWS */}
 
                       <button
                         type="button"
                         onClick={() =>
-                          handleEdit(item)
+                          handleViewReviews(item)
                         }
-                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-semibold text-text transition hover:bg-background"
+                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/10"
                       >
-                        <Pencil size={16} />
-                        Edit
+                        <MessageSquare size={16} />
+                        View Reviews
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleDelete(item._id)
-                        }
-                        className="flex items-center justify-center rounded-xl border border-red-100 px-4 py-2.5 text-red-500 transition hover:bg-red-50"
-                        title="Delete item"
-                      >
-                        <Trash2 size={17} />
-                      </button>
+                      {/* EDIT / DELETE */}
+
+                      <div className="mt-3 flex gap-2">
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEdit(item)
+                          }
+                          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-semibold text-text transition hover:bg-background"
+                        >
+                          <Pencil size={16} />
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDelete(item._id)
+                          }
+                          className="flex items-center justify-center rounded-xl border border-red-100 px-4 py-2.5 text-red-500 transition hover:bg-red-50"
+                          title="Delete item"
+                        >
+                          <Trash2 size={17} />
+                        </button>
+
+                      </div>
 
                     </div>
 
                   </div>
+
+                ))}
+
+              </div>
+
+              {/* ==============================
+                  PAGINATION
+              ============================== */}
+
+              {totalPages > 1 && (
+                <div className="mt-10 flex items-center justify-center gap-3">
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => prev - 1)
+                    }
+                    disabled={currentPage === 1}
+                    className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+
+                  <div className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white">
+                    {currentPage}
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => prev + 1)
+                    }
+                    disabled={currentPage === totalPages}
+                    className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    More
+                  </button>
 
                 </div>
+              )}
 
-              ))}
-
-            </div>
+            </>
 
           )}
 
         </div>
 
       </section>
-
 
       {/* ======================================
           REVIEWS MODAL
@@ -810,7 +889,7 @@ function MyItems() {
 
           <div className="max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl">
 
-            {}
+            {/* MODAL HEADER */}
 
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
 
@@ -839,8 +918,7 @@ function MyItems() {
 
             </div>
 
-
-            {}
+            {/* REVIEWS */}
 
             <div className="max-h-[65vh] overflow-y-auto p-5">
 
@@ -922,7 +1000,9 @@ function MyItems() {
 
         </div>
       )}
-    <Footer/>
+
+      <Footer />
+
     </main>
   );
 }

@@ -2,6 +2,7 @@ import itemSchema from"../model/itemmodel.js";
 import userSchema from "../model/usermodel.js";
 import reviewSchema from "../model/reviewmodel.js"
 import requestSchema from "../model/requestmodel.js"
+import notificationSchema from "../model/notificationmodel.js"
 import bcrypt from 'bcrypt'
 import pkg from 'jsonwebtoken'
 import { createNotification } from "./notificationController.js";
@@ -111,9 +112,75 @@ export async function Login(req, res) {
   token: token,
   role: user.role,
 });
+
 }
+export async function checkVerificationStatus(req, res) {
+  try {
+    const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).send({
+        msg: "Email is required",
+      });
+    }
 
+    const user = await userSchema.findOne({ email });
+
+    if (!user) {
+      return res.status(404).send({
+        msg: "User does not exist",
+      });
+    }
+
+    // Account is verified
+    if (user.isVerified) {
+      return res.status(200).send({
+        success: true,
+        status: "verified",
+        msg: "Your account has been verified. You can now login.",
+      });
+    }
+
+    // Account is blocked
+    if (user.isBlocked) {
+      return res.status(200).send({
+        success: true,
+        status: "blocked",
+        msg: "Your account has been blocked by the administrator.",
+      });
+    }
+
+    // Check latest rejection notification
+    const rejectionNotification = await notificationSchema
+      .findOne({
+        recipient: user._id,
+        type: "USER_REJECTED",
+      })
+      .sort({ createdAt: -1 });
+
+    if (rejectionNotification) {
+      return res.status(200).send({
+        success: true,
+        status: "rejected",
+        msg: rejectionNotification.message,
+      });
+    }
+
+    // Still waiting
+    return res.status(200).send({
+      success: true,
+      status: "pending",
+      msg: "Your account is still waiting for admin verification.",
+    });
+
+  } catch (err) {
+    console.log("Check verification status error:", err);
+
+    res.status(500).send({
+      msg: err.message,
+    });
+  }
+}
 
 
 

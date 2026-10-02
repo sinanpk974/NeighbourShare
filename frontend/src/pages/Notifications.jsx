@@ -28,6 +28,10 @@ function Notifications() {
   const [markingAll, setMarkingAll] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
+  // Pagination
+  const NOTIFICATIONS_PER_PAGE = 12;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
@@ -173,14 +177,9 @@ function Notifications() {
         }
       );
 
-      setNotifications(
-        response.data.notifications || []
-      );
+      setNotifications(response.data.notifications || []);
     } catch (error) {
-      console.log(
-        "Get notifications error:",
-        error
-      );
+      console.log("Get notifications error:", error);
 
       setNotifications([]);
     } finally {
@@ -188,11 +187,8 @@ function Notifications() {
     }
   };
 
-  const handleNotificationClick = async (
-    notification
-  ) => {
+  const handleNotificationClick = async (notification) => {
     try {
-
       if (!notification.isRead) {
         setActionLoading(notification._id);
 
@@ -219,7 +215,6 @@ function Notifications() {
       }
 
       switch (notification.type) {
-
         case "REQUEST":
           if (notification.request) {
             navigate(
@@ -261,12 +256,12 @@ function Notifications() {
           break;
 
         case "REVIEW":
-  if (notification.review) {
-    navigate(`/ViewReview?review=${notification.review}`);
-  } else {
-    navigate("/ViewReview");
-  }
-  break;
+          if (notification.review) {
+            navigate(`/ViewReview?review=${notification.review}`);
+          } else {
+            navigate("/ViewReview");
+          }
+          break;
 
         case "USER_VERIFIED":
         case "USER_REJECTED":
@@ -295,10 +290,7 @@ function Notifications() {
           break;
       }
     } catch (error) {
-      console.log(
-        "Notification action error:",
-        error
-      );
+      console.log("Notification action error:", error);
     } finally {
       setActionLoading(null);
     }
@@ -342,6 +334,30 @@ function Notifications() {
     (notification) => !notification.isRead
   ).length;
 
+  // ==========================================
+  // PAGINATION
+  // ==========================================
+
+  const totalPages = Math.ceil(
+    notifications.length / NOTIFICATIONS_PER_PAGE
+  );
+
+  const startIndex =
+    (currentPage - 1) * NOTIFICATIONS_PER_PAGE;
+
+  const paginatedNotifications = notifications.slice(
+    startIndex,
+    startIndex + NOTIFICATIONS_PER_PAGE
+  );
+
+  // Keep current page valid after notifications
+  // are marked/deleted/refreshed.
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -383,9 +399,6 @@ function Notifications() {
           ====================================== */}
 
           <div className="flex items-center gap-3">
-
-            {}
-
             <button
               type="button"
               onClick={getNotifications}
@@ -394,17 +407,11 @@ function Notifications() {
             >
               <RefreshCw
                 size={17}
-                className={
-                  loading
-                    ? "animate-spin"
-                    : ""
-                }
+                className={loading ? "animate-spin" : ""}
               />
 
               Refresh
             </button>
-
-            {}
 
             {unreadCount > 0 && (
               <button
@@ -470,113 +477,151 @@ function Notifications() {
               NOTIFICATION LIST
           ====================================== */
 
-          <div className="overflow-hidden rounded-3xl border border-border bg-card">
-            {notifications.map(
-              (notification, index) => (
-                <button
-                  key={notification._id}
-                  type="button"
-                  onClick={() =>
-                    handleNotificationClick(
-                      notification
-                    )
-                  }
-                  disabled={
-                    actionLoading ===
-                    notification._id
-                  }
-                  className={`relative flex w-full items-start gap-4 px-5 py-5 text-left transition sm:px-6 ${
-                    index !==
-                    notifications.length - 1
-                      ? "border-b border-border"
-                      : ""
-                  } ${
-                    notification.isRead
-                      ? "bg-card hover:bg-background/60"
-                      : "bg-primary/5 hover:bg-primary/10"
-                  }`}
-                >
-
-                  {/* ==================================
-                      UNREAD INDICATOR
-                  ================================== */}
-
-                  {!notification.isRead && (
-                    <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
-                  )}
-
-                  {/* ==================================
-                      ICON
-                  ================================== */}
-
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${getNotificationIconStyle(
-                      notification.type
-                    )}`}
+          <>
+            <div className="overflow-hidden rounded-3xl border border-border bg-card">
+              {paginatedNotifications.map(
+                (notification, index) => (
+                  <button
+                    key={notification._id}
+                    type="button"
+                    onClick={() =>
+                      handleNotificationClick(notification)
+                    }
+                    disabled={
+                      actionLoading === notification._id
+                    }
+                    className={`relative flex w-full items-start gap-4 px-5 py-5 text-left transition sm:px-6 ${
+                      index !==
+                      paginatedNotifications.length - 1
+                        ? "border-b border-border"
+                        : ""
+                    } ${
+                      notification.isRead
+                        ? "bg-card hover:bg-background/60"
+                        : "bg-primary/5 hover:bg-primary/10"
+                    }`}
                   >
-                    {getNotificationIcon(
-                      notification.type
-                    )}
-                  </div>
-
-                  {/* ==================================
-                      CONTENT
-                  ================================== */}
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                      <h3
-                        className={`text-sm font-semibold ${
-                          notification.isRead
-                            ? "text-text"
-                            : "text-primary-dark"
-                        }`}
-                      >
-                        {notification.title}
-                      </h3>
-
-                      <div className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
-                        <Clock size={13} />
-
-                        {formatNotificationTime(
-                          notification.createdAt
-                        )}
-                      </div>
-                    </div>
-
-                    <p className="mt-1.5 text-sm leading-6 text-muted">
-                      {notification.message}
-                    </p>
-
                     {/* ==================================
-                        SENDER
+                        UNREAD INDICATOR
                     ================================== */}
 
-                    {notification.sender?.name && (
-                      <p className="mt-2 text-xs text-muted">
-                        From:{" "}
-                        <span className="font-medium text-text">
-                          {notification.sender.name}
-                        </span>
-                      </p>
+                    {!notification.isRead && (
+                      <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
                     )}
-                  </div>
 
-                  {/* ==================================
-                      ACTION LOADING
-                  ================================== */}
+                    {/* ==================================
+                        ICON
+                    ================================== */}
 
-                  {actionLoading ===
-                    notification._id && (
-                    <RefreshCw
-                      size={17}
-                      className="mt-1 shrink-0 animate-spin text-primary"
-                    />
-                  )}
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${getNotificationIconStyle(
+                        notification.type
+                      )}`}
+                    >
+                      {getNotificationIcon(
+                        notification.type
+                      )}
+                    </div>
+
+                    {/* ==================================
+                        CONTENT
+                    ================================== */}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                        <h3
+                          className={`text-sm font-semibold ${
+                            notification.isRead
+                              ? "text-text"
+                              : "text-primary-dark"
+                          }`}
+                        >
+                          {notification.title}
+                        </h3>
+
+                        <div className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
+                          <Clock size={13} />
+
+                          {formatNotificationTime(
+                            notification.createdAt
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="mt-1.5 text-sm leading-6 text-muted">
+                        {notification.message}
+                      </p>
+
+                      {/* ==================================
+                          SENDER
+                      ================================== */}
+
+                      {notification.sender?.name && (
+                        <p className="mt-2 text-xs text-muted">
+                          From:{" "}
+                          <span className="font-medium text-text">
+                            {notification.sender.name}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* ==================================
+                        ACTION LOADING
+                    ================================== */}
+
+                    {actionLoading === notification._id && (
+                      <RefreshCw
+                        size={17}
+                        className="mt-1 shrink-0 animate-spin text-primary"
+                      />
+                    )}
+                  </button>
+                )
+              )}
+            </div>
+
+            {/* ======================================
+                PAGINATION
+            ====================================== */}
+
+            {totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((previousPage) =>
+                      Math.max(previousPage - 1, 1)
+                    )
+                  }
+                  disabled={currentPage === 1}
+                  className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-text transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous
                 </button>
-              )
+
+                <span className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white">
+                  {currentPage}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((previousPage) =>
+                      Math.min(
+                        previousPage + 1,
+                        totalPages
+                      )
+                    )
+                  }
+                  disabled={currentPage === totalPages}
+                  className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-text transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  More
+                </button>
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>

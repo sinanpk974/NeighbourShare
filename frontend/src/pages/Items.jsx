@@ -14,20 +14,45 @@ function Items() {
   const categoryFromUrl = searchParams.get("category") || "";
 
   const [search, setSearch] = useState(titleFromUrl);
+
+  // ==============================
+  // PAGINATION
+  // ==============================
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 12;
+
+  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const paginatedItems = items.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
   useEffect(() => {
     setSearch(titleFromUrl);
   }, [titleFromUrl]);
 
+  // Reset pagination whenever search/category changes
   useEffect(() => {
+    setCurrentPage(1);
+  }, [search, categoryFromUrl]);
 
+  // Prevent page from going beyond available pages
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
     if (categoryFromUrl) {
-
       if (categoryFromUrl.toLowerCase() === "others") {
-
         axios
           .get("http://localhost:3003/api/getItems")
           .then((res) => {
-
             const excludedCategories = [
               "tools",
               "electronics",
@@ -43,17 +68,14 @@ function Items() {
             );
 
             setItems(filteredItems);
-
           })
           .catch((error) => {
-
             console.log(
               "Error fetching other items:",
               error
             );
 
             setItems([]);
-
           });
 
         return;
@@ -66,33 +88,27 @@ function Items() {
           },
         })
         .then((res) => {
-
           console.log(
             "Category results:",
             res.data
           );
 
           setItems(res.data.items);
-
         })
         .catch((error) => {
-
           console.log(
             "Error filtering category:",
             error
           );
 
           setItems([]);
-
         });
 
       return;
     }
 
     if (search.trim()) {
-
       const timer = setTimeout(() => {
-
         axios
           .get("http://localhost:3003/api/search", {
             params: {
@@ -100,26 +116,21 @@ function Items() {
             },
           })
           .then((res) => {
-
             console.log(
               "Search results:",
               res.data
             );
 
             setItems(res.data.items);
-
           })
           .catch((error) => {
-
             console.log(
               "Error searching items:",
               error
             );
 
             setItems([]);
-
           });
-
       }, 400);
 
       return () => clearTimeout(timer);
@@ -128,39 +139,29 @@ function Items() {
     axios
       .get("http://localhost:3003/api/getItems")
       .then((res) => {
-
         setItems(res.data);
-
       })
       .catch((error) => {
-
         console.log(
           "Error fetching items:",
           error
         );
 
         setItems([]);
-
       });
-
   }, [search, categoryFromUrl]);
 
   const handleSearch = (e) => {
-
     const value = e.target.value;
 
     setSearch(value);
 
     if (value.trim()) {
-
       setSearchParams({
         title: value.trim(),
       });
-
     } else {
-
       setSearchParams({});
-
     }
   };
 
@@ -172,7 +173,6 @@ function Items() {
       ============================== */}
 
       <section className="border-b border-border bg-white">
-
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
           <p className="text-sm font-semibold text-primary">
@@ -188,7 +188,6 @@ function Items() {
           </p>
 
         </div>
-
       </section>
 
       {/* ==============================
@@ -196,7 +195,6 @@ function Items() {
       ============================== */}
 
       <section className="bg-background">
-
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
           <div className="relative">
@@ -217,7 +215,6 @@ function Items() {
           </div>
 
         </div>
-
       </section>
 
       {/* ==============================
@@ -225,7 +222,6 @@ function Items() {
       ============================== */}
 
       <section className="pb-20">
-
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
           {/* ==============================
@@ -235,20 +231,16 @@ function Items() {
           <div className="mb-6">
 
             <h2 className="text-xl font-bold text-text">
-
               {categoryFromUrl
                 ? `${categoryFromUrl} items`
                 : search
                 ? `Search results for "${search}"`
                 : "All items"}
-
             </h2>
 
             <p className="mt-1 text-sm text-muted">
-
               {items.length} item
               {items.length !== 1 ? "s" : ""}
-
             </p>
 
           </div>
@@ -258,20 +250,53 @@ function Items() {
           ============================== */}
 
           {items.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-5 px-3 sm:grid-cols-2 sm:gap-6 sm:px-0 lg:grid-cols-3 xl:grid-cols-4">
 
-            <div className="grid grid-cols-1 gap-5 px-3 sm:grid-cols-2 sm:gap-6 sm:px-0 lg:grid-cols-3 xl:grid-cols-4">
+                {paginatedItems.map((item) => (
+                  <ItemCard
+                    key={item._id}
+                    item={item}
+                  />
+                ))}
 
-              {items.map((item) => (
+              </div>
 
-                <ItemCard
-                  key={item._id}
-                  item={item}
-                />
+              {/* ==============================
+                  PAGINATION
+              ============================== */}
 
-              ))}
+              {totalPages > 1 && (
+                <div className="mt-10 flex items-center justify-center gap-3">
 
-            </div>
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => prev - 1)
+                    }
+                    disabled={currentPage === 1}
+                    className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
 
+                  <div className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white">
+                    {currentPage}
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => prev + 1)
+                    }
+                    disabled={currentPage === totalPages}
+                    className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    More
+                  </button>
+
+                </div>
+              )}
+
+            </>
           ) : (
 
             /* ==============================
@@ -293,9 +318,9 @@ function Items() {
           )}
 
         </div>
-
       </section>
-      <Footer/>
+
+      <Footer />
     </div>
   );
 }

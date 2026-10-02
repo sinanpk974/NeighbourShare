@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import {
   User,
@@ -15,9 +16,12 @@ import {
   X,
   Save,
   Lock,
+  LogOut,
 } from "lucide-react";
 
 function AdminProfile() {
+  const navigate = useNavigate();
+
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -71,6 +75,13 @@ function AdminProfile() {
   useEffect(() => {
     fetchAdminProfile();
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
+    navigate("/login");
+  };
 
   const handleOpenEdit = () => {
     setSuccessMessage("");
@@ -137,14 +148,12 @@ function AdminProfile() {
       setEditOpen(false);
 
       setSuccessMessage(
-        response.data.msg ||
-          "Admin profile updated successfully."
+        response.data.msg || "Admin profile updated successfully."
       );
 
       setTimeout(() => {
         setSuccessMessage("");
       }, 4000);
-
     } catch (error) {
       console.log("Admin profile update error:", error);
 
@@ -171,9 +180,7 @@ function AdminProfile() {
   if (loading) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
-
         <div className="flex flex-col items-center gap-4">
-
           <RefreshCw
             size={32}
             className="animate-spin text-primary"
@@ -182,9 +189,7 @@ function AdminProfile() {
           <p className="text-sm text-muted">
             Loading admin profile...
           </p>
-
         </div>
-
       </div>
     );
   }
@@ -192,18 +197,14 @@ function AdminProfile() {
   if (error && !admin) {
     return (
       <div className="mx-auto max-w-5xl">
-
         <div className="rounded-3xl border border-red-200 bg-red-50 p-6">
-
           <div className="flex items-center gap-3">
-
             <AlertCircle
               size={22}
               className="text-red-600"
             />
 
             <div>
-
               <h2 className="font-semibold text-red-700">
                 Unable to load profile
               </h2>
@@ -211,9 +212,7 @@ function AdminProfile() {
               <p className="mt-1 text-sm text-red-600">
                 {error}
               </p>
-
             </div>
-
           </div>
 
           <button
@@ -222,9 +221,7 @@ function AdminProfile() {
           >
             Try Again
           </button>
-
         </div>
-
       </div>
     );
   }
@@ -232,24 +229,16 @@ function AdminProfile() {
   if (!admin) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-
         <p className="text-muted">
           Admin profile not found.
         </p>
-
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-5xl">
-
-      {}
-      {}
-      {}
-
       <div className="mb-8">
-
         <p className="text-sm font-semibold tracking-wide text-primary">
           ADMINISTRATION
         </p>
@@ -261,68 +250,39 @@ function AdminProfile() {
         <p className="mt-2 text-muted">
           Manage and view your administrator account information.
         </p>
-
       </div>
 
-
-      {}
-
       {successMessage && (
-
         <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-medium text-green-700">
-
           {successMessage}
-
         </div>
-
       )}
 
-
-      {}
-      {}
-      {}
-
       <div className="overflow-hidden rounded-3xl border border-border bg-card">
-
         <div className="bg-primary px-6 py-8 sm:px-8">
-
           <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
-
             <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border-4 border-white/20 bg-white/10 text-white">
-
               {admin.profileImage ? (
-
                 <img
                   src={admin.profileImage}
                   alt={admin.name}
                   className="h-full w-full object-cover"
                 />
-
               ) : (
-
                 <User size={42} />
-
               )}
-
             </div>
 
-
             <div className="text-center sm:text-left">
-
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center">
-
                 <h2 className="text-2xl font-bold text-white">
                   {admin.name}
                 </h2>
 
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
-
                   <ShieldCheck size={15} />
-
                   Administrator
-
                 </span>
-
               </div>
 
               <p className="mt-2 text-sm text-white/80">
@@ -332,22 +292,12 @@ function AdminProfile() {
               <p className="mt-1 text-sm text-white/70">
                 NeighbourShare Community Administrator
               </p>
-
             </div>
-
           </div>
-
         </div>
 
-
-        {}
-        {}
-        {}
-
         <div className="p-6 sm:p-8">
-
           <div className="mb-6">
-
             <h3 className="text-lg font-bold text-text">
               Personal Information
             </h3>
@@ -355,26 +305,16 @@ function AdminProfile() {
             <p className="mt-1 text-sm text-muted">
               Your account and contact details.
             </p>
-
           </div>
 
-
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-            {}
-
             <div className="rounded-2xl border border-border bg-background p-4">
-
               <div className="flex items-center gap-3">
-
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
                   <User size={19} />
-
                 </div>
 
                 <div className="min-w-0">
-
                   <p className="text-xs text-muted">
                     Full Name
                   </p>
@@ -382,28 +322,17 @@ function AdminProfile() {
                   <p className="mt-1 truncate font-semibold text-text">
                     {admin.name}
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
-
-            {}
-
             <div className="rounded-2xl border border-border bg-background p-4">
-
               <div className="flex items-center gap-3">
-
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
                   <Mail size={19} />
-
                 </div>
 
                 <div className="min-w-0">
-
                   <p className="text-xs text-muted">
                     Email Address
                   </p>
@@ -411,28 +340,17 @@ function AdminProfile() {
                   <p className="mt-1 truncate font-semibold text-text">
                     {admin.email}
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
-
-            {}
-
             <div className="rounded-2xl border border-border bg-background p-4">
-
               <div className="flex items-center gap-3">
-
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
                   <Phone size={19} />
-
                 </div>
 
                 <div>
-
                   <p className="text-xs text-muted">
                     Phone Number
                   </p>
@@ -440,28 +358,17 @@ function AdminProfile() {
                   <p className="mt-1 font-semibold text-text">
                     {admin.phone || "Not available"}
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
-
-            {}
-
             <div className="rounded-2xl border border-border bg-background p-4">
-
               <div className="flex items-center gap-3">
-
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
                   <MapPin size={19} />
-
                 </div>
 
                 <div>
-
                   <p className="text-xs text-muted">
                     Village
                   </p>
@@ -469,28 +376,17 @@ function AdminProfile() {
                   <p className="mt-1 font-semibold text-text">
                     {admin.village || "Not available"}
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
-
-            {}
-
             <div className="rounded-2xl border border-border bg-background p-4 sm:col-span-2">
-
               <div className="flex items-start gap-3">
-
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
                   <Home size={19} />
-
                 </div>
 
                 <div>
-
                   <p className="text-xs text-muted">
                     Address
                   </p>
@@ -498,24 +394,13 @@ function AdminProfile() {
                   <p className="mt-1 font-semibold text-text">
                     {admin.address || "Not available"}
                   </p>
-
                 </div>
-
               </div>
-
             </div>
-
           </div>
 
-
-          {}
-          {}
-          {}
-
           <div className="mt-8 border-t border-border pt-8">
-
             <div className="mb-5">
-
               <h3 className="text-lg font-bold text-text">
                 Account Information
               </h3>
@@ -523,26 +408,16 @@ function AdminProfile() {
               <p className="mt-1 text-sm text-muted">
                 Administrator account status and details.
               </p>
-
             </div>
 
-
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-
-              {}
-
               <div className="rounded-2xl border border-border bg-card p-4">
-
                 <div className="flex items-center gap-3">
-
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
                     <ShieldCheck size={19} />
-
                   </div>
 
                   <div>
-
                     <p className="text-xs text-muted">
                       Account Role
                     </p>
@@ -550,28 +425,17 @@ function AdminProfile() {
                     <p className="mt-1 font-semibold capitalize text-text">
                       {admin.role}
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
 
-
-              {}
-
               <div className="rounded-2xl border border-border bg-card p-4">
-
                 <div className="flex items-center gap-3">
-
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-600">
-
                     <ShieldCheck size={19} />
-
                   </div>
 
                   <div>
-
                     <p className="text-xs text-muted">
                       Account Status
                     </p>
@@ -579,28 +443,17 @@ function AdminProfile() {
                     <p className="mt-1 font-semibold text-green-600">
                       Verified
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
 
-
-              {}
-
               <div className="rounded-2xl border border-border bg-card p-4">
-
                 <div className="flex items-center gap-3">
-
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-
                     <Calendar size={19} />
-
                   </div>
 
                   <div>
-
                     <p className="text-xs text-muted">
                       Member Since
                     </p>
@@ -608,70 +461,45 @@ function AdminProfile() {
                     <p className="mt-1 font-semibold text-text">
                       {formatDate(admin.createdAt)}
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
-
             </div>
-
           </div>
 
-
-          {}
-          {}
-          {}
-
           <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-
             <button
               onClick={fetchAdminProfile}
               className="flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
             >
-
               <RefreshCw size={17} />
-
               Refresh Profile
-
             </button>
-
 
             <button
               onClick={handleOpenEdit}
               className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
             >
-
               <Pencil size={17} />
-
               Edit Profile
-
             </button>
 
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+            >
+              <LogOut size={17} />
+              Logout
+            </button>
           </div>
-
         </div>
-
       </div>
 
-
-      {}
-      {}
-      {}
-
       {editOpen && (
-
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-card shadow-xl">
-
-            {}
-
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-5">
-
               <div>
-
                 <h2 className="text-xl font-bold text-text">
                   Edit Admin Profile
                 </h2>
@@ -679,9 +507,7 @@ function AdminProfile() {
                 <p className="mt-1 text-sm text-muted">
                   Update your administrator account information.
                 </p>
-
               </div>
-
 
               <button
                 type="button"
@@ -689,27 +515,16 @@ function AdminProfile() {
                 disabled={saving}
                 className="flex h-10 w-10 items-center justify-center rounded-xl text-muted transition hover:bg-background hover:text-text disabled:opacity-50"
               >
-
                 <X size={20} />
-
               </button>
-
             </div>
-
-
-            {}
 
             <form
               onSubmit={handleUpdateProfile}
               className="p-6"
             >
-
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-
-                {}
-
                 <div>
-
                   <label className="mb-2 block text-sm font-semibold text-text">
                     Full Name
                   </label>
@@ -722,14 +537,9 @@ function AdminProfile() {
                     required
                     className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-
                 </div>
 
-
-                {}
-
                 <div>
-
                   <label className="mb-2 block text-sm font-semibold text-text">
                     Email Address
                   </label>
@@ -742,14 +552,9 @@ function AdminProfile() {
                     required
                     className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-
                 </div>
 
-
-                {}
-
                 <div>
-
                   <label className="mb-2 block text-sm font-semibold text-text">
                     Phone Number
                   </label>
@@ -762,14 +567,9 @@ function AdminProfile() {
                     required
                     className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-
                 </div>
 
-
-                {}
-
                 <div>
-
                   <label className="mb-2 block text-sm font-semibold text-text">
                     Village
                   </label>
@@ -782,14 +582,9 @@ function AdminProfile() {
                     required
                     className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-
                 </div>
 
-
-                {}
-
                 <div className="sm:col-span-2">
-
                   <label className="mb-2 block text-sm font-semibold text-text">
                     Address
                   </label>
@@ -802,14 +597,9 @@ function AdminProfile() {
                     rows="3"
                     className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-
                 </div>
 
-
-                {}
-
                 <div className="sm:col-span-2">
-
                   <label className="mb-2 block text-sm font-semibold text-text">
                     Profile Image URL
                   </label>
@@ -822,20 +612,12 @@ function AdminProfile() {
                     placeholder="https://example.com/profile-image.jpg"
                     className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-
                 </div>
 
-
-                {}
-
                 <div className="sm:col-span-2">
-
                   <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-text">
-
                     <Lock size={16} className="text-primary" />
-
                     New Password
-
                   </label>
 
                   <input
@@ -850,16 +632,10 @@ function AdminProfile() {
                   <p className="mt-2 text-xs text-muted">
                     Leave this field empty if you do not want to change your password.
                   </p>
-
                 </div>
-
               </div>
 
-
-              {}
-
               <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
-
                 <button
                   type="button"
                   onClick={() => setEditOpen(false)}
@@ -869,42 +645,27 @@ function AdminProfile() {
                   Cancel
                 </button>
 
-
                 <button
                   type="submit"
                   disabled={saving}
                   className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
                 >
-
                   {saving ? (
-
                     <RefreshCw
                       size={17}
                       className="animate-spin"
                     />
-
                   ) : (
-
                     <Save size={17} />
-
                   )}
 
-                  {saving
-                    ? "Saving..."
-                    : "Save Changes"}
-
+                  {saving ? "Saving..." : "Save Changes"}
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }

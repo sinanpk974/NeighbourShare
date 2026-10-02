@@ -32,7 +32,16 @@ function AdminItems() {
   const [loading, setLoading] = useState(true);
   const [loadingOwner, setLoadingOwner] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // ==============================
+  // PAGINATION
+  // ==============================
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 10;
+
   const token = localStorage.getItem("token");
+
   const fetchItems = async () => {
     try {
       setLoading(true);
@@ -52,6 +61,7 @@ function AdminItems() {
   useEffect(() => {
     fetchItems();
   }, []);
+
   const handleViewOwner = async (ownerId, itemId) => {
     if (!ownerId) {
       alert("Owner information not available");
@@ -99,6 +109,7 @@ function AdminItems() {
       setLoadingOwner(null);
     }
   };
+
   const handleDelete = async (itemId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this item?"
@@ -142,49 +153,74 @@ function AdminItems() {
     }
   };
 
-const filteredItems = items.filter((item) => {
-  const searchText = search.toLowerCase().trim();
+  // ==============================
+  // FILTER ITEMS
+  // ==============================
 
-  const ownerId =
-    item.owner?._id?.toString() ||
-    item.owner?.toString();
+  const filteredItems = items.filter((item) => {
+    const searchText = search.toLowerCase().trim();
 
-  const matchesUser = userId
-    ? ownerId === userId
-    : true;
+    const ownerId =
+      item.owner?._id?.toString() ||
+      item.owner?.toString();
 
-  const itemTitle =
-    item.title?.toLowerCase() || "";
+    const matchesUser = userId
+      ? ownerId === userId
+      : true;
 
-  const category =
-    item.category?.toLowerCase() || "";
+    const itemTitle =
+      item.title?.toLowerCase() || "";
 
-  const description =
-    item.description?.toLowerCase() || "";
+    const category =
+      item.category?.toLowerCase() || "";
 
-  const condition =
-    item.condition?.toLowerCase() || "";
+    const description =
+      item.description?.toLowerCase() || "";
 
-  const ownerName =
-    typeof item.owner === "object"
-      ? item.owner?.name?.toLowerCase() || ""
-      : "";
+    const condition =
+      item.condition?.toLowerCase() || "";
 
-  const ownerEmail =
-    typeof item.owner === "object"
-      ? item.owner?.email?.toLowerCase() || ""
-      : "";
+    const ownerName =
+      typeof item.owner === "object"
+        ? item.owner?.name?.toLowerCase() || ""
+        : "";
 
-  const matchesSearch =
-    itemTitle.includes(searchText) ||
-    category.includes(searchText) ||
-    description.includes(searchText) ||
-    condition.includes(searchText) ||
-    ownerName.includes(searchText) ||
-    ownerEmail.includes(searchText);
+    const ownerEmail =
+      typeof item.owner === "object"
+        ? item.owner?.email?.toLowerCase() || ""
+        : "";
 
-  return matchesUser && matchesSearch;
-});
+    const matchesSearch =
+      itemTitle.includes(searchText) ||
+      category.includes(searchText) ||
+      description.includes(searchText) ||
+      condition.includes(searchText) ||
+      ownerName.includes(searchText) ||
+      ownerEmail.includes(searchText);
+
+    return matchesUser && matchesSearch;
+  });
+
+  // ==============================
+  // PAGINATION
+  // ==============================
+
+  const totalPages = Math.ceil(
+    filteredItems.length / ITEMS_PER_PAGE
+  );
+
+  const startIndex =
+    (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const paginatedItems = filteredItems.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  // ==============================
+  // LOADING
+  // ==============================
+
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
@@ -243,9 +279,6 @@ const filteredItems = items.filter((item) => {
 
           </div>
 
-
-          {}
-
           <div className="relative w-full lg:w-80">
 
             <Search
@@ -257,9 +290,10 @@ const filteredItems = items.filter((item) => {
               type="text"
               placeholder="Search items or owner..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-card text-text placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
 
@@ -268,7 +302,6 @@ const filteredItems = items.filter((item) => {
         </div>
 
       </div>
-
 
       {/* ==========================================
           ITEM COUNT
@@ -290,7 +323,6 @@ const filteredItems = items.filter((item) => {
         </p>
 
       </div>
-
 
       {/* ==========================================
           NO ITEMS
@@ -325,189 +357,234 @@ const filteredItems = items.filter((item) => {
 
       ) : (
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+        <>
+          {/* ==========================================
+              ITEMS GRID
+          ========================================== */}
 
-          {filteredItems.map((item) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
 
-            const ownerId =
-              item.owner?._id || item.owner;
+            {paginatedItems.map((item) => {
 
-            return (
+              const ownerId =
+                item.owner?._id || item.owner;
 
-              <div
-                key={item._id}
-                className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-md transition"
-              >
+              return (
 
-                {}
+                <div
+                  key={item._id}
+                  className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-md transition"
+                >
 
-                <div className="relative">
+                  {/* IMAGE */}
 
-                  {item.image ? (
+                  <div className="relative">
 
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-44 object-cover"
-                    />
+                    {item.image ? (
 
-                  ) : (
-
-                    <div className="w-full h-44 bg-background flex items-center justify-center">
-
-                      <Package
-                        size={42}
-                        className="text-muted"
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-44 object-cover"
                       />
-
-                    </div>
-
-                  )}
-
-
-                  {}
-
-                  <div className="absolute top-3 right-3">
-
-                    {item.availability === "Available" ? (
-
-                      <span className="flex items-center gap-1 bg-success text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
-
-                        <CircleCheck size={12} />
-
-                        Available
-
-                      </span>
 
                     ) : (
 
-                      <span className="flex items-center gap-1 bg-danger text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                      <div className="w-full h-44 bg-background flex items-center justify-center">
 
-                        <CircleX size={12} />
+                        <Package
+                          size={42}
+                          className="text-muted"
+                        />
 
-                        Borrowed
-
-                      </span>
+                      </div>
 
                     )}
 
+                    {/* AVAILABILITY */}
+
+                    <div className="absolute top-3 right-3">
+
+                      {item.availability === "Available" ? (
+
+                        <span className="flex items-center gap-1 bg-success text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
+
+                          <CircleCheck size={12} />
+
+                          Available
+
+                        </span>
+
+                      ) : (
+
+                        <span className="flex items-center gap-1 bg-danger text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
+
+                          <CircleX size={12} />
+
+                          Borrowed
+
+                        </span>
+
+                      )}
+
+                    </div>
+
                   </div>
 
-                </div>
+                  {/* ITEM CONTENT */}
 
+                  <div className="p-4">
 
-                {}
+                    <h2 className="font-bold text-text text-base truncate">
+                      {item.title}
+                    </h2>
 
-                <div className="p-4">
+                    <div className="flex items-center gap-1.5 mt-2">
 
-                  <h2 className="font-bold text-text text-base truncate">
-                    {item.title}
-                  </h2>
+                      <Tag
+                        size={14}
+                        className="text-primary"
+                      />
 
-                  <div className="flex items-center gap-1.5 mt-2">
+                      <span className="text-xs text-muted truncate">
+                        {item.category || "No category"}
+                      </span>
 
-                    <Tag
-                      size={14}
-                      className="text-primary"
-                    />
+                    </div>
 
-                    <span className="text-xs text-muted truncate">
-                      {item.category || "No category"}
-                    </span>
-
-                  </div>
-
-                  <p className="text-xs text-muted mt-2 line-clamp-2 min-h-[32px]">
-                    {item.description ||
-                      "No description available."}
-                  </p>
-
-
-                  {}
-
-                  <div className="mt-3">
-
-                    <span className="text-[11px] text-muted">
-                      Condition
-                    </span>
-
-                    <p className="text-sm font-medium text-text truncate">
-                      {item.condition ||
-                        "Not specified"}
+                    <p className="text-xs text-muted mt-2 line-clamp-2 min-h-[32px]">
+                      {item.description ||
+                        "No description available."}
                     </p>
 
-                  </div>
+                    {/* CONDITION */}
 
+                    <div className="mt-3">
 
-                  {}
+                      <span className="text-[11px] text-muted">
+                        Condition
+                      </span>
 
-                  <button
-                    onClick={() =>
-                      handleViewOwner(
-                        ownerId,
-                        item._id
-                      )
-                    }
-                    disabled={
-                      !ownerId ||
-                      loadingOwner === item._id
-                    }
-                    className="w-full mt-4 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-primary text-white hover:bg-primary-dark transition text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
+                      <p className="text-sm font-medium text-text truncate">
+                        {item.condition ||
+                          "Not specified"}
+                      </p>
 
-                    <User size={15} />
+                    </div>
 
-                    {loadingOwner === item._id
-                      ? "Loading..."
-                      : "View Owner"}
-
-                  </button>
-
-
-                  {}
-
-                  <div className="flex items-center gap-2 mt-2">
+                    {/* VIEW OWNER */}
 
                     <button
                       onClick={() =>
-                        setSelectedItem(item)
+                        handleViewOwner(
+                          ownerId,
+                          item._id
+                        )
                       }
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-border text-text hover:bg-background transition text-sm font-medium"
+                      disabled={
+                        !ownerId ||
+                        loadingOwner === item._id
+                      }
+                      className="w-full mt-4 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-primary text-white hover:bg-primary-dark transition text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
 
-                      <Eye size={16} />
+                      <User size={15} />
 
-                      View
+                      {loadingOwner === item._id
+                        ? "Loading..."
+                        : "View Owner"}
 
                     </button>
 
+                    {/* VIEW + DELETE */}
 
-                    <button
-                      onClick={() =>
-                        handleDelete(item._id)
-                      }
-                      disabled={deleting}
-                      title="Delete item"
-                      className="flex items-center justify-center px-3 py-2.5 rounded-xl bg-danger text-white hover:opacity-90 transition disabled:opacity-50"
-                    >
+                    <div className="flex items-center gap-2 mt-2">
 
-                      <Trash2 size={15} />
+                      <button
+                        onClick={() =>
+                          setSelectedItem(item)
+                        }
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-border text-text hover:bg-background transition text-sm font-medium"
+                      >
 
-                    </button>
+                        <Eye size={16} />
+
+                        View
+
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleDelete(item._id)
+                        }
+                        disabled={deleting}
+                        title="Delete item"
+                        className="flex items-center justify-center px-3 py-2.5 rounded-xl bg-danger text-white hover:opacity-90 transition disabled:opacity-50"
+                      >
+
+                        <Trash2 size={15} />
+
+                      </button>
+
+                    </div>
 
                   </div>
 
                 </div>
 
-              </div>
+              );
+            })}
 
-            );
-          })}
+          </div>
 
-        </div>
+          {/* ==========================================
+              PAGINATION
+          ========================================== */}
+
+          {totalPages > 1 && (
+
+            <div className="flex items-center justify-center gap-3 mt-8">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.max(prev - 1, 1)
+                  )
+                }
+                disabled={currentPage === 1}
+                className="px-5 py-2.5 rounded-xl border border-border bg-card text-text text-sm font-medium transition hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+
+              <span className="px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-semibold">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(
+                      prev + 1,
+                      totalPages
+                    )
+                  )
+                }
+                disabled={currentPage === totalPages}
+                className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-medium transition hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                More
+              </button>
+
+            </div>
+
+          )}
+
+        </>
 
       )}
-
 
       {/* ==================================================
           ITEM DETAILS MODAL
@@ -559,7 +636,6 @@ const filteredItems = items.filter((item) => {
 
             </div>
 
-
             <div className="p-6">
 
               {selectedItem.image && (
@@ -575,7 +651,6 @@ const filteredItems = items.filter((item) => {
               <h3 className="text-2xl font-bold text-text">
                 {selectedItem.title}
               </h3>
-
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
 
@@ -598,7 +673,6 @@ const filteredItems = items.filter((item) => {
 
                 </div>
 
-
                 <div className="bg-background rounded-2xl p-4">
 
                   <div className="flex items-center gap-2 text-muted mb-1">
@@ -617,7 +691,6 @@ const filteredItems = items.filter((item) => {
                   </p>
 
                 </div>
-
 
                 <div className="bg-background rounded-2xl p-4">
 
@@ -643,7 +716,6 @@ const filteredItems = items.filter((item) => {
 
                 </div>
 
-
                 <div className="bg-background rounded-2xl p-4">
 
                   <div className="flex items-center gap-2 text-muted mb-1">
@@ -663,7 +735,6 @@ const filteredItems = items.filter((item) => {
                 </div>
 
               </div>
-
 
               <div className="mt-5">
 
@@ -685,7 +756,6 @@ const filteredItems = items.filter((item) => {
         </div>
 
       )}
-
 
       {/* ==================================================
           OWNER DETAILS MODAL
@@ -737,10 +807,9 @@ const filteredItems = items.filter((item) => {
 
             </div>
 
-
             <div className="p-6">
 
-              {}
+              {/* OWNER INFO */}
 
               <div className="bg-background rounded-2xl p-5">
 
@@ -776,8 +845,7 @@ const filteredItems = items.filter((item) => {
 
               </div>
 
-
-              {}
+              {/* OWNER STATS */}
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
 
@@ -799,7 +867,6 @@ const filteredItems = items.filter((item) => {
 
                 </div>
 
-
                 <div className="border border-border rounded-2xl p-4">
 
                   <div className="flex items-center gap-2 text-muted">
@@ -818,7 +885,6 @@ const filteredItems = items.filter((item) => {
                   </p>
 
                 </div>
-
 
                 <div className="border border-border rounded-2xl p-4">
 
@@ -840,8 +906,7 @@ const filteredItems = items.filter((item) => {
 
               </div>
 
-
-              {}
+              {/* OWNER ITEMS */}
 
               <div className="mt-7">
 
@@ -916,8 +981,7 @@ const filteredItems = items.filter((item) => {
 
               </div>
 
-
-              {}
+              {/* REVIEWS */}
 
               <div className="mt-7">
 
@@ -1015,8 +1079,7 @@ const filteredItems = items.filter((item) => {
 
               </div>
 
-
-              {}
+              {/* REQUEST STATS */}
 
               <div className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -1038,7 +1101,6 @@ const filteredItems = items.filter((item) => {
                   </p>
 
                 </div>
-
 
                 <div className="border border-border rounded-2xl p-4">
 

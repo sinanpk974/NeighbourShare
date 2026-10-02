@@ -14,6 +14,7 @@ const router = Router()
 
 router.route('/register').post(rh.Register)
 router.route('/login').post(rh.Login)
+router.post("/check-verification",rh.checkVerificationStatus);
 router.route('/myProfile').get(Auth,rh.getmyProfile)
 router.route('/updateProfile').patch(Auth,rh.updateProfile)
 router.route('/deleteAccount').delete(Auth,rh.deleteAccount)

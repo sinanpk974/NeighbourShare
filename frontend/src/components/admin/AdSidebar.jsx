@@ -7,10 +7,10 @@ import {
   Package,
   ClipboardList,
   Star,
-  Trash2,
   LogOut,
   ShieldCheck,
   X,
+  Bell,
 } from "lucide-react";
 
 function AdminSidebar({ mobileOpen, setMobileOpen }) {
@@ -54,12 +54,16 @@ function AdminSidebar({ mobileOpen, setMobileOpen }) {
       path: "/admin/reviews",
       icon: Star,
     },
-    
+    {
+      name: "Notifications",
+      path: "/admin/notifications",
+      icon: Bell,
+    },
   ];
 
   return (
     <>
-      {}
+      {/* MOBILE OVERLAY */}
 
       {mobileOpen && (
         <div
@@ -68,7 +72,7 @@ function AdminSidebar({ mobileOpen, setMobileOpen }) {
         />
       )}
 
-      {}
+      {/* SIDEBAR */}
 
       <aside
         className={`
@@ -81,12 +85,10 @@ function AdminSidebar({ mobileOpen, setMobileOpen }) {
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {}
+        {/* HEADER */}
 
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
-
           <div className="flex items-center gap-3">
-
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent shadow-sm">
               <ShieldCheck size={23} />
             </div>
@@ -100,10 +102,9 @@ function AdminSidebar({ mobileOpen, setMobileOpen }) {
                 Admin Panel
               </p>
             </div>
-
           </div>
 
-          {}
+          {/* MOBILE CLOSE */}
 
           <button
             type="button"
@@ -112,26 +113,18 @@ function AdminSidebar({ mobileOpen, setMobileOpen }) {
           >
             <X size={21} />
           </button>
-
         </div>
 
-
-        {}
+        {/* ADMIN INFO */}
 
         <div className="px-5 pt-6">
-
           <div className="rounded-xl border border-white/10 bg-white/10 px-4 py-3">
-
             <div className="flex items-center gap-3">
-
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-
                 <ShieldCheck size={18} />
-
               </div>
 
               <div>
-
                 <p className="text-sm font-semibold">
                   Administrator
                 </p>
@@ -139,26 +132,19 @@ function AdminSidebar({ mobileOpen, setMobileOpen }) {
                 <p className="text-xs text-white/60">
                   Community management
                 </p>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
 
-
-        {}
+        {/* NAVIGATION */}
 
         <nav className="flex-1 overflow-y-auto px-4 py-6">
-
           <p className="mb-3 px-3 text-xs font-semibold tracking-wider text-white/45">
             MANAGEMENT
           </p>
 
           <div className="space-y-1">
-
             {menuItems.map((item) => {
               const Icon = item.icon;
 
@@ -180,38 +166,28 @@ function AdminSidebar({ mobileOpen, setMobileOpen }) {
                     `
                   }
                 >
-
                   <Icon size={19} />
 
                   {item.name}
-
                 </NavLink>
               );
             })}
-
           </div>
-
         </nav>
 
-
-        {}
+        {/* LOGOUT */}
 
         <div className="border-t border-white/10 p-4">
-
           <button
             type="button"
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/75 transition hover:bg-red-500/20 hover:text-white"
           >
-
             <LogOut size={19} />
 
             Logout
-
           </button>
-
         </div>
-
       </aside>
     </>
   );

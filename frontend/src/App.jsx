@@ -26,6 +26,7 @@ import AdminItems from "./pages/admin/AdminItems";
 import AdminRequest from "./pages/admin/AdminRequests";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminProfile from "./pages/admin/AdminProfile";
+import AdminNotification from "./pages/admin/AdminNotification";
 
 function App() {
 
@@ -196,6 +197,10 @@ function App() {
           <Route
             path="profile"
             element={<AdminProfile />}
+          />
+          <Route 
+          path="notifications"
+          element={<AdminNotification />}
           />
         </Route>
 
