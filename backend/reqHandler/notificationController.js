@@ -1,4 +1,5 @@
 import notificationSchemaModel from "../model/notificationmodel.js";
+import { getIO } from "../socket.js";
 
 export async function createNotification({
   recipient,
@@ -19,16 +20,45 @@ export async function createNotification({
       return null;
     }
 
-    const notification = await notificationSchemaModel.create({
-      recipient,
-      sender,
-      title,
-      message,
-      type,
-      request,
-      item,
-      review,
-    });
+    // ==========================================
+    // SAVE NOTIFICATION TO DATABASE
+    // ==========================================
+
+    const notification =
+      await notificationSchemaModel.create({
+        recipient,
+        sender,
+        title,
+        message,
+        type,
+        request,
+        item,
+        review,
+      });
+
+    // ==========================================
+    // SEND REAL-TIME NOTIFICATION
+    // ==========================================
+
+    try {
+      const io = getIO();
+
+      const roomName = `user:${recipient}`;
+
+      io.to(roomName).emit(
+        "newNotification",
+        notification
+      );
+
+      console.log(
+        `Real-time notification sent to ${roomName}`
+      );
+    } catch (socketError) {
+      console.log(
+        "Socket notification error:",
+        socketError.message
+      );
+    }
 
     return notification;
 
@@ -37,6 +67,7 @@ export async function createNotification({
       "Notification creation error:",
       error.message
     );
+
     return null;
   }
 }

@@ -25,8 +25,13 @@ const itemSchema = new mongoose.Schema(
     },
 
     image: {
-      type: String,
-      default: "",
+    type: String,
+    default: "",
+    },
+
+    imagePublicId: {
+    type: String,
+    default: "",
     },
 
     condition: {

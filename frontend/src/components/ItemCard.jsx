@@ -9,14 +9,14 @@ function ItemCard({ item }) {
     <div className="group overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
 
       {}
-      <div className="relative h-52 overflow-hidden bg-primary/5">
+      <div className="relative h-52 overflow-hidden bg-gray-100">
 
         {item?.image ? (
           <img
-            src={item.image}
-            alt={item.title || "Item"}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-          />
+  src={item.image}
+  alt={item.title || "Item"}
+  className="h-full w-full object-contain p-0.5 transition duration-300 group-hover:scale-105"
+/>
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted">
             No image available

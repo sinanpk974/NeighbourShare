@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 
 import {
   Bell,
@@ -34,6 +35,25 @@ function Notifications() {
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
+
+  // ==========================================
+  // GET USER ID FROM JWT TOKEN
+  // ==========================================
+
+  const getUserIdFromToken = () => {
+    try {
+      if (!token) return null;
+
+      const payload = JSON.parse(
+        atob(token.split(".")[1])
+      );
+
+      return payload.UserID || payload.userId || payload.id;
+    } catch (error) {
+      console.log("Token decode error:", error);
+      return null;
+    }
+  };
 
   const getNotificationIcon = (type) => {
     const iconProps = {
@@ -164,6 +184,10 @@ function Notifications() {
     });
   };
 
+  // ==========================================
+  // GET NOTIFICATIONS
+  // ==========================================
+
   const getNotifications = async () => {
     try {
       setLoading(true);
@@ -187,7 +211,89 @@ function Notifications() {
     }
   };
 
-  const handleNotificationClick = async (notification) => {
+  // ==========================================
+  // SOCKET.IO REAL-TIME NOTIFICATIONS
+  // ==========================================
+
+  useEffect(() => {
+    if (!token) return;
+
+    const userId = getUserIdFromToken();
+
+    if (!userId) {
+      console.log("User ID not found in token");
+      return;
+    }
+
+    const socket = io("http://localhost:3003");
+
+    socket.on("connect", () => {
+      console.log(
+        "Socket connected:",
+        socket.id
+      );
+
+      socket.emit(
+        "joinNotificationRoom",
+        userId
+      );
+
+      console.log(
+        `Joined notification room: user:${userId}`
+      );
+    });
+
+    socket.on("newNotification", (notification) => {
+      console.log(
+        "New real-time notification:",
+        notification
+      );
+
+      setNotifications((previousNotifications) => {
+        // Prevent duplicate notification
+        const alreadyExists =
+          previousNotifications.some(
+            (item) =>
+              item._id === notification._id
+          );
+
+        if (alreadyExists) {
+          return previousNotifications;
+        }
+
+        return [
+          notification,
+          ...previousNotifications,
+        ];
+      });
+
+      // New notification should appear on first page
+      setCurrentPage(1);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.log(
+        "Socket connection error:",
+        error.message
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [token]);
+
+  // ==========================================
+  // HANDLE NOTIFICATION CLICK
+  // ==========================================
+
+  const handleNotificationClick = async (
+    notification
+  ) => {
     try {
       if (!notification.isRead) {
         setActionLoading(notification._id);
@@ -202,15 +308,16 @@ function Notifications() {
           }
         );
 
-        setNotifications((previousNotifications) =>
-          previousNotifications.map((item) =>
-            item._id === notification._id
-              ? {
-                  ...item,
-                  isRead: true,
-                }
-              : item
-          )
+        setNotifications(
+          (previousNotifications) =>
+            previousNotifications.map((item) =>
+              item._id === notification._id
+                ? {
+                    ...item,
+                    isRead: true,
+                  }
+                : item
+            )
         );
       }
 
@@ -221,7 +328,9 @@ function Notifications() {
               `/myRequests?tab=received&request=${notification.request}`
             );
           } else {
-            navigate("/myRequests?tab=received");
+            navigate(
+              "/myRequests?tab=received"
+            );
           }
           break;
 
@@ -231,7 +340,9 @@ function Notifications() {
               `/myRequests?tab=sent&request=${notification.request}`
             );
           } else {
-            navigate("/myRequests?tab=sent");
+            navigate(
+              "/myRequests?tab=sent"
+            );
           }
           break;
 
@@ -241,7 +352,9 @@ function Notifications() {
               `/myRequests?tab=sent&request=${notification.request}`
             );
           } else {
-            navigate("/myRequests?tab=sent");
+            navigate(
+              "/myRequests?tab=sent"
+            );
           }
           break;
 
@@ -251,13 +364,17 @@ function Notifications() {
               `/myRequests?tab=sent&request=${notification.request}`
             );
           } else {
-            navigate("/myRequests?tab=sent");
+            navigate(
+              "/myRequests?tab=sent"
+            );
           }
           break;
 
         case "REVIEW":
           if (notification.review) {
-            navigate(`/ViewReview?review=${notification.review}`);
+            navigate(
+              `/ViewReview?review=${notification.review}`
+            );
           } else {
             navigate("/ViewReview");
           }
@@ -290,11 +407,18 @@ function Notifications() {
           break;
       }
     } catch (error) {
-      console.log("Notification action error:", error);
+      console.log(
+        "Notification action error:",
+        error
+      );
     } finally {
       setActionLoading(null);
     }
   };
+
+  // ==========================================
+  // MARK ALL AS READ
+  // ==========================================
 
   const markAllNotificationsAsRead = async () => {
     try {
@@ -310,11 +434,14 @@ function Notifications() {
         }
       );
 
-      setNotifications((previousNotifications) =>
-        previousNotifications.map((notification) => ({
-          ...notification,
-          isRead: true,
-        }))
+      setNotifications(
+        (previousNotifications) =>
+          previousNotifications.map(
+            (notification) => ({
+              ...notification,
+              isRead: true,
+            })
+          )
       );
     } catch (error) {
       console.log(
@@ -325,6 +452,10 @@ function Notifications() {
       setMarkingAll(false);
     }
   };
+
+  // ==========================================
+  // INITIAL LOAD
+  // ==========================================
 
   useEffect(() => {
     getNotifications();
@@ -339,21 +470,26 @@ function Notifications() {
   // ==========================================
 
   const totalPages = Math.ceil(
-    notifications.length / NOTIFICATIONS_PER_PAGE
+    notifications.length /
+      NOTIFICATIONS_PER_PAGE
   );
 
   const startIndex =
-    (currentPage - 1) * NOTIFICATIONS_PER_PAGE;
+    (currentPage - 1) *
+    NOTIFICATIONS_PER_PAGE;
 
-  const paginatedNotifications = notifications.slice(
-    startIndex,
-    startIndex + NOTIFICATIONS_PER_PAGE
-  );
+  const paginatedNotifications =
+    notifications.slice(
+      startIndex,
+      startIndex + NOTIFICATIONS_PER_PAGE
+    );
 
-  // Keep current page valid after notifications
-  // are marked/deleted/refreshed.
+  // Keep current page valid
   useEffect(() => {
-    if (totalPages > 0 && currentPage > totalPages) {
+    if (
+      totalPages > 0 &&
+      currentPage > totalPages
+    ) {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
@@ -407,7 +543,11 @@ function Notifications() {
             >
               <RefreshCw
                 size={17}
-                className={loading ? "animate-spin" : ""}
+                className={
+                  loading
+                    ? "animate-spin"
+                    : ""
+                }
               />
 
               Refresh
@@ -416,7 +556,9 @@ function Notifications() {
             {unreadCount > 0 && (
               <button
                 type="button"
-                onClick={markAllNotificationsAsRead}
+                onClick={
+                  markAllNotificationsAsRead
+                }
                 disabled={markingAll}
                 className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
@@ -485,10 +627,13 @@ function Notifications() {
                     key={notification._id}
                     type="button"
                     onClick={() =>
-                      handleNotificationClick(notification)
+                      handleNotificationClick(
+                        notification
+                      )
                     }
                     disabled={
-                      actionLoading === notification._id
+                      actionLoading ===
+                      notification._id
                     }
                     className={`relative flex w-full items-start gap-4 px-5 py-5 text-left transition sm:px-6 ${
                       index !==
@@ -501,17 +646,13 @@ function Notifications() {
                         : "bg-primary/5 hover:bg-primary/10"
                     }`}
                   >
-                    {/* ==================================
-                        UNREAD INDICATOR
-                    ================================== */}
+                    {/* UNREAD INDICATOR */}
 
                     {!notification.isRead && (
                       <span className="absolute left-0 top-0 h-full w-1 bg-primary" />
                     )}
 
-                    {/* ==================================
-                        ICON
-                    ================================== */}
+                    {/* ICON */}
 
                     <div
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${getNotificationIconStyle(
@@ -523,9 +664,7 @@ function Notifications() {
                       )}
                     </div>
 
-                    {/* ==================================
-                        CONTENT
-                    ================================== */}
+                    {/* CONTENT */}
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
@@ -552,9 +691,7 @@ function Notifications() {
                         {notification.message}
                       </p>
 
-                      {/* ==================================
-                          SENDER
-                      ================================== */}
+                      {/* SENDER */}
 
                       {notification.sender?.name && (
                         <p className="mt-2 text-xs text-muted">
@@ -566,11 +703,10 @@ function Notifications() {
                       )}
                     </div>
 
-                    {/* ==================================
-                        ACTION LOADING
-                    ================================== */}
+                    {/* ACTION LOADING */}
 
-                    {actionLoading === notification._id && (
+                    {actionLoading ===
+                      notification._id && (
                       <RefreshCw
                         size={17}
                         className="mt-1 shrink-0 animate-spin text-primary"
@@ -590,8 +726,12 @@ function Notifications() {
                 <button
                   type="button"
                   onClick={() =>
-                    setCurrentPage((previousPage) =>
-                      Math.max(previousPage - 1, 1)
+                    setCurrentPage(
+                      (previousPage) =>
+                        Math.max(
+                          previousPage - 1,
+                          1
+                        )
                     )
                   }
                   disabled={currentPage === 1}
@@ -607,14 +747,17 @@ function Notifications() {
                 <button
                   type="button"
                   onClick={() =>
-                    setCurrentPage((previousPage) =>
-                      Math.min(
-                        previousPage + 1,
-                        totalPages
-                      )
+                    setCurrentPage(
+                      (previousPage) =>
+                        Math.min(
+                          previousPage + 1,
+                          totalPages
+                        )
                     )
                   }
-                  disabled={currentPage === totalPages}
+                  disabled={
+                    currentPage === totalPages
+                  }
                   className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-text transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   More

@@ -36,9 +36,11 @@ function AdminProfile() {
     phone: "",
     village: "",
     address: "",
-    profileImage: "",
+    profileImage: null,
     password: "",
   });
+
+  const [existingImage, setExistingImage] = useState("");
 
   const fetchAdminProfile = async () => {
     try {
@@ -61,6 +63,13 @@ function AdminProfile() {
       }
     } catch (error) {
       console.log("Admin profile loading error:", error);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        navigate("/login");
+        return;
+      }
 
       setError(
         error.response?.data?.message ||
@@ -85,6 +94,7 @@ function AdminProfile() {
 
   const handleOpenEdit = () => {
     setSuccessMessage("");
+    setError("");
 
     setFormData({
       name: admin.name || "",
@@ -92,20 +102,25 @@ function AdminProfile() {
       phone: admin.phone || "",
       village: admin.village || "",
       address: admin.address || "",
-      profileImage: admin.profileImage || "",
+      profileImage: null,
       password: "",
     });
+
+    setExistingImage(admin.profileImage || "");
 
     setEditOpen(true);
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: files ? files[0] : value,
     }));
+
+    setError("");
+    setSuccessMessage("");
   };
 
   const handleUpdateProfile = async (e) => {
@@ -118,22 +133,28 @@ function AdminProfile() {
 
       const token = localStorage.getItem("token");
 
-      const updateData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        village: formData.village,
-        address: formData.address,
-        profileImage: formData.profileImage,
-      };
+      const data = new FormData();
+
+      data.append("name", formData.name);
+      data.append("email", formData.email);
+      data.append("phone", formData.phone);
+      data.append("village", formData.village);
+      data.append("address", formData.address);
+
+      if (formData.profileImage) {
+        data.append(
+          "profileImage",
+          formData.profileImage
+        );
+      }
 
       if (formData.password.trim() !== "") {
-        updateData.password = formData.password;
+        data.append("password", formData.password);
       }
 
       const response = await axios.patch(
-        "http://localhost:3003/api/admin/profile",
-        updateData,
+        "http://localhost:3003/api/updateProfile",
+        data,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -143,12 +164,17 @@ function AdminProfile() {
 
       if (response.data.user) {
         setAdmin(response.data.user);
+
+        setExistingImage(
+          response.data.user.profileImage || ""
+        );
       }
 
       setEditOpen(false);
 
       setSuccessMessage(
-        response.data.msg || "Admin profile updated successfully."
+        response.data.msg ||
+          "Admin profile updated successfully."
       );
 
       setTimeout(() => {
@@ -156,6 +182,13 @@ function AdminProfile() {
       }, 4000);
     } catch (error) {
       console.log("Admin profile update error:", error);
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        navigate("/login");
+        return;
+      }
 
       setError(
         error.response?.data?.msg ||
@@ -238,6 +271,7 @@ function AdminProfile() {
 
   return (
     <div className="mx-auto max-w-5xl">
+
       <div className="mb-8">
         <p className="text-sm font-semibold tracking-wide text-primary">
           ADMINISTRATION
@@ -258,10 +292,21 @@ function AdminProfile() {
         </div>
       )}
 
+      {error && admin && (
+        <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-medium text-red-700">
+          {error}
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-3xl border border-border bg-card">
+
+        {/* PROFILE HEADER */}
+
         <div className="bg-primary px-6 py-8 sm:px-8">
           <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+
             <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border-4 border-white/20 bg-white/10 text-white">
+
               {admin.profileImage ? (
                 <img
                   src={admin.profileImage}
@@ -271,10 +316,13 @@ function AdminProfile() {
               ) : (
                 <User size={42} />
               )}
+
             </div>
 
             <div className="text-center sm:text-left">
+
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center">
+
                 <h2 className="text-2xl font-bold text-white">
                   {admin.name}
                 </h2>
@@ -283,6 +331,7 @@ function AdminProfile() {
                   <ShieldCheck size={15} />
                   Administrator
                 </span>
+
               </div>
 
               <p className="mt-2 text-sm text-white/80">
@@ -292,11 +341,15 @@ function AdminProfile() {
               <p className="mt-1 text-sm text-white/70">
                 NeighbourShare Community Administrator
               </p>
+
             </div>
           </div>
         </div>
 
+        {/* PROFILE DETAILS */}
+
         <div className="p-6 sm:p-8">
+
           <div className="mb-6">
             <h3 className="text-lg font-bold text-text">
               Personal Information
@@ -308,8 +361,10 @@ function AdminProfile() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
             <div className="rounded-2xl border border-border bg-background p-4">
               <div className="flex items-center gap-3">
+
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <User size={19} />
                 </div>
@@ -323,11 +378,13 @@ function AdminProfile() {
                     {admin.name}
                   </p>
                 </div>
+
               </div>
             </div>
 
             <div className="rounded-2xl border border-border bg-background p-4">
               <div className="flex items-center gap-3">
+
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Mail size={19} />
                 </div>
@@ -341,11 +398,13 @@ function AdminProfile() {
                     {admin.email}
                   </p>
                 </div>
+
               </div>
             </div>
 
             <div className="rounded-2xl border border-border bg-background p-4">
               <div className="flex items-center gap-3">
+
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Phone size={19} />
                 </div>
@@ -359,11 +418,13 @@ function AdminProfile() {
                     {admin.phone || "Not available"}
                   </p>
                 </div>
+
               </div>
             </div>
 
             <div className="rounded-2xl border border-border bg-background p-4">
               <div className="flex items-center gap-3">
+
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <MapPin size={19} />
                 </div>
@@ -377,11 +438,13 @@ function AdminProfile() {
                     {admin.village || "Not available"}
                   </p>
                 </div>
+
               </div>
             </div>
 
             <div className="rounded-2xl border border-border bg-background p-4 sm:col-span-2">
               <div className="flex items-start gap-3">
+
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Home size={19} />
                 </div>
@@ -395,11 +458,16 @@ function AdminProfile() {
                     {admin.address || "Not available"}
                   </p>
                 </div>
+
               </div>
             </div>
+
           </div>
 
+          {/* ACCOUNT INFORMATION */}
+
           <div className="mt-8 border-t border-border pt-8">
+
             <div className="mb-5">
               <h3 className="text-lg font-bold text-text">
                 Account Information
@@ -411,8 +479,10 @@ function AdminProfile() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
               <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-3">
+
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <ShieldCheck size={19} />
                   </div>
@@ -426,11 +496,13 @@ function AdminProfile() {
                       {admin.role}
                     </p>
                   </div>
+
                 </div>
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-3">
+
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-600">
                     <ShieldCheck size={19} />
                   </div>
@@ -444,11 +516,13 @@ function AdminProfile() {
                       Verified
                     </p>
                   </div>
+
                 </div>
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-3">
+
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Calendar size={19} />
                   </div>
@@ -462,12 +536,17 @@ function AdminProfile() {
                       {formatDate(admin.createdAt)}
                     </p>
                   </div>
+
                 </div>
               </div>
+
             </div>
           </div>
 
+          {/* ACTION BUTTONS */}
+
           <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+
             <button
               onClick={fetchAdminProfile}
               className="flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
@@ -491,14 +570,21 @@ function AdminProfile() {
               <LogOut size={17} />
               Logout
             </button>
+
           </div>
+
         </div>
       </div>
 
+      {/* EDIT MODAL */}
+
       {editOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-card shadow-xl">
+
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-5">
+
               <div>
                 <h2 className="text-xl font-bold text-text">
                   Edit Admin Profile
@@ -517,13 +603,49 @@ function AdminProfile() {
               >
                 <X size={20} />
               </button>
+
             </div>
 
             <form
               onSubmit={handleUpdateProfile}
               className="p-6"
             >
+
+              {/* IMAGE PREVIEW */}
+
+              <div className="mb-6 flex flex-col items-center">
+
+                <div className="h-28 w-28 overflow-hidden rounded-3xl border-4 border-border bg-background shadow-sm">
+
+                  {formData.profileImage ? (
+                    <img
+                      src={URL.createObjectURL(
+                        formData.profileImage
+                      )}
+                      alt={formData.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : existingImage ? (
+                    <img
+                      src={existingImage}
+                      alt={formData.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <User
+                        size={42}
+                        className="text-muted"
+                      />
+                    </div>
+                  )}
+
+                </div>
+
+              </div>
+
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-text">
                     Full Name
@@ -599,24 +721,37 @@ function AdminProfile() {
                   />
                 </div>
 
+                {/* PROFILE IMAGE */}
+
                 <div className="sm:col-span-2">
+
                   <label className="mb-2 block text-sm font-semibold text-text">
-                    Profile Image URL
+                    Profile Image
                   </label>
 
                   <input
-                    type="text"
+                    type="file"
                     name="profileImage"
-                    value={formData.profileImage}
+                    accept="image/*"
                     onChange={handleChange}
-                    placeholder="https://example.com/profile-image.jpg"
                     className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
+
+                  <p className="mt-2 text-xs text-muted">
+                    Select a new image to change your administrator profile picture.
+                  </p>
+
                 </div>
 
+                {/* PASSWORD */}
+
                 <div className="sm:col-span-2">
+
                   <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-text">
-                    <Lock size={16} className="text-primary" />
+                    <Lock
+                      size={16}
+                      className="text-primary"
+                    />
                     New Password
                   </label>
 
@@ -632,10 +767,15 @@ function AdminProfile() {
                   <p className="mt-2 text-xs text-muted">
                     Leave this field empty if you do not want to change your password.
                   </p>
+
                 </div>
+
               </div>
 
+              {/* FORM BUTTONS */}
+
               <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
+
                 <button
                   type="button"
                   onClick={() => setEditOpen(false)}
@@ -659,9 +799,13 @@ function AdminProfile() {
                     <Save size={17} />
                   )}
 
-                  {saving ? "Saving..." : "Save Changes"}
+                  {saving
+                    ? "Saving..."
+                    : "Save Changes"}
                 </button>
+
               </div>
+
             </form>
           </div>
         </div>

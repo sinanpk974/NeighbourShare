@@ -3,6 +3,7 @@ import userSchema from "../model/usermodel.js"
 import requestSchema from "../model/requestmodel.js"
 import reviewSchema from "../model/reviewmodel.js"
 import { createNotification } from "./notificationController.js";
+import cloudinary from "../config/cloudinary.js";
 
 export async function getProfile(req, res) {
     try {
@@ -310,77 +311,218 @@ export async function unblockUser(req, res) {
   }
 }
 
-export async function deleteUser(req, res) {
-    try {
+export async function approveDeletion(req, res) {
+  const userId = req.params.id;
 
-        const { id } = req.params;
+  try {
+    const user = await userSchema.findById(userId);
 
-        if (req.user.UserID === id) {
-            return res.status(400).send({
-                success: false,
-                message: "You cannot delete your own account."
-            });
-        }
-
-        const user = await userSchema.findById(id);
-
-        if (!user) {
-            return res.status(404).send({
-                success: false,
-                message: "User not found."
-            });
-        }
-        const activeBorrow = await requestSchema.findOne({
-    status: "Accepted",
-    $or: [
-        { owner: id },
-        { borrower: id }
-    ]
-});
-
-if (activeBorrow) {
-    return res.status(400).send({
-        success: false,
-        message: "Cannot delete a user with an active borrowing transaction."
-    });
-}
-
-        await itemSchema.deleteMany({ owner: id });
-
-        await requestSchema.deleteMany({
-            $or: [
-                { owner: id },
-                { borrower: id }
-            ]
-        });
-
-        await reviewSchema.deleteMany({
-            $or: [
-                { reviewer: id },
-                {
-                    reviewType: "user",
-                    targetId: id
-                }
-            ]
-        });
-
-        await userSchema.findByIdAndDelete(id);
-
-        res.status(200).send({
-            success: true,
-            message: "User and all related data deleted successfully."
-        });
-
-    } catch (error) {
-
-        res.status(500).send({
-            success: false,
-            message: error.message
-        });
-
+    if (!user) {
+      return res.status(404).send({
+        msg: "User not found",
+      });
     }
+
+    if (user.deletionStatus !== "Pending") {
+      return res.status(400).send({
+        msg: "No pending deletion request for this user",
+      });
+    }
+
+    const activeBorrowing = await requestSchema.findOne({
+      borrower: userId,
+      status: "Accepted",
+    });
+
+    if (activeBorrowing) {
+      return res.status(400).send({
+        msg: "Account cannot be deleted because the user has an active borrowed item",
+      });
+    }
+
+    // Find user's items before deleting them
+    const userItems = await itemSchema.find({
+      owner: userId,
+    });
+
+    // Delete user's profile image from Cloudinary
+    if (user.profileImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(
+          user.profileImagePublicId
+        );
+      } catch (cloudinaryError) {
+        console.log(
+          "Profile image deletion error:",
+          cloudinaryError.message
+        );
+      }
+    }
+
+    // Delete all item images from Cloudinary
+    for (const item of userItems) {
+      if (item.imagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(
+            item.imagePublicId
+          );
+        } catch (cloudinaryError) {
+          console.log(
+            "Item image deletion error:",
+            cloudinaryError.message
+          );
+        }
+      }
+    }
+
+    // Delete user's items
+    await itemSchema.deleteMany({
+      owner: userId,
+    });
+
+    // Delete user's requests
+    await requestSchema.deleteMany({
+      $or: [
+        { borrower: userId },
+        { owner: userId },
+      ],
+    });
+
+    // Delete user's reviews
+    await reviewSchema.deleteMany({
+      reviewer: userId,
+    });
+
+    // Delete user
+    await userSchema.findByIdAndDelete(userId);
+
+    res.status(200).send({
+      msg: "Account deletion approved and account deleted successfully",
+    });
+
+  } catch (err) {
+    console.log("Approve deletion error:", err);
+
+    res.status(500).send({
+      msg: err.message,
+    });
+  }
 }
 
+
+export async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (req.user.UserID === id) {
+      return res.status(400).send({
+        success: false,
+        message: "You cannot delete your own account.",
+      });
+    }
+
+    const user = await userSchema.findById(id);
+
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const activeBorrow = await requestSchema.findOne({
+      status: "Accepted",
+      $or: [
+        { owner: id },
+        { borrower: id },
+      ],
+    });
+
+    if (activeBorrow) {
+      return res.status(400).send({
+        success: false,
+        message:
+          "Cannot delete a user with an active borrowing transaction.",
+      });
+    }
+
+    // Find user's items before deleting them
+    const userItems = await itemSchema.find({
+      owner: id,
+    });
+
+    // Delete user's profile image from Cloudinary
+    if (user.profileImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(
+          user.profileImagePublicId
+        );
+      } catch (cloudinaryError) {
+        console.log(
+          "Profile image deletion error:",
+          cloudinaryError.message
+        );
+      }
+    }
+
+    // Delete all item images from Cloudinary
+    for (const item of userItems) {
+      if (item.imagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(
+            item.imagePublicId
+          );
+        } catch (cloudinaryError) {
+          console.log(
+            "Item image deletion error:",
+            cloudinaryError.message
+          );
+        }
+      }
+    }
+
+    // Delete user's items
+    await itemSchema.deleteMany({
+      owner: id,
+    });
+
+    // Delete user's requests
+    await requestSchema.deleteMany({
+      $or: [
+        { owner: id },
+        { borrower: id },
+      ],
+    });
+
+    // Delete user's reviews
+    await reviewSchema.deleteMany({
+      $or: [
+        { reviewer: id },
+        {
+          reviewType: "user",
+          targetId: id,
+        },
+      ],
+    });
+
+    // Delete user
+    await userSchema.findByIdAndDelete(id);
+
+    res.status(200).send({
+      success: true,
+      message:
+        "User and all related data deleted successfully.",
+    });
+
+  } catch (error) {
+    console.log("Delete user error:", error);
+
+    res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
+}
 export async function adminDashboard(req, res) {
     try {
 
@@ -484,19 +626,38 @@ export async function deleteAnyItem(req, res) {
         message: "Item not found.",
       });
     }
+
     const itemOwner = item.owner;
 
+    // Delete item image from Cloudinary
+    if (item.imagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(
+          item.imagePublicId
+        );
+      } catch (cloudinaryError) {
+        console.log(
+          "Cloudinary item image deletion error:",
+          cloudinaryError.message
+        );
+      }
+    }
+
+    // Delete related requests
     await requestSchema.deleteMany({
       item: id,
     });
 
+    // Delete related reviews
     await reviewSchema.deleteMany({
       type: "item",
       item: id,
     });
 
+    // Delete item from MongoDB
     await itemSchema.findByIdAndDelete(id);
 
+    // Notify item owner
     await createNotification({
       recipient: itemOwner,
       sender: req.user.UserID,
@@ -632,56 +793,6 @@ export async function getPendingDeletions(req, res) {
   }
 }
 
-export async function approveDeletion(req, res) {
-  const userId = req.params.id;
-
-  try {
-    const user = await userSchema.findById(userId);
-
-    if (!user) {
-      return res.status(404).send({
-        msg: "User not found",
-      });
-    }
-    if (user.deletionStatus !== "Pending") {
-      return res.status(400).send({
-        msg: "No pending deletion request for this user",
-      });
-    }
-    const activeBorrowing = await requestSchema.findOne({
-      borrower: userId,
-      status: "Accepted",
-    });
-
-    if (activeBorrowing) {
-      return res.status(400).send({
-        msg: "Account cannot be deleted because the user has an active borrowed item",
-      });
-    }
-    await itemSchema.deleteMany({
-      owner: userId,
-    });
-    await requestSchema.deleteMany({
-      $or: [
-        { borrower: userId },
-        { owner: userId },
-      ],
-    });
-    await reviewSchema.deleteMany({
-      reviewer: userId,
-    });
-    await userSchema.findByIdAndDelete(userId);
-
-    res.status(200).send({
-      msg: "Account deletion approved and account deleted successfully",
-    });
-
-  } catch (err) {
-    res.status(500).send({
-      msg: err.message,
-    });
-  }
-}
 
 export async function rejectDeletion(req, res) {
   const userId = req.params.id;

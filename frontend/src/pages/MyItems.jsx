@@ -29,9 +29,11 @@ function MyItems() {
     title: "",
     category: "",
     description: "",
-    image: "",
+    image: null,
     condition: "",
   });
+
+  const [existingImage, setExistingImage] = useState("");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -105,14 +107,15 @@ function MyItems() {
   // ==============================
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
 
     setFormData((previous) => ({
       ...previous,
-      [name]: value,
+      [name]: files ? files[0] : value,
     }));
 
     setError("");
+    setSuccess("");
   };
 
   const resetForm = () => {
@@ -120,12 +123,34 @@ function MyItems() {
       title: "",
       category: "",
       description: "",
-      image: "",
+      image: null,
       condition: "",
     });
 
+    setExistingImage("");
     setEditingItem(null);
     setShowAddForm(false);
+  };
+
+  // ==============================
+  // OPEN ADD FORM
+  // ==============================
+
+  const handleOpenAddForm = () => {
+    setEditingItem(null);
+
+    setFormData({
+      title: "",
+      category: "",
+      description: "",
+      image: null,
+      condition: "",
+    });
+
+    setExistingImage("");
+    setError("");
+    setSuccess("");
+    setShowAddForm(true);
   };
 
   // ==============================
@@ -142,18 +167,29 @@ function MyItems() {
       !formData.title ||
       !formData.category ||
       !formData.description ||
-      !formData.condition
+      !formData.condition ||
+      !formData.image
     ) {
-      setError("Please fill all required fields.");
+      setError(
+        "Please fill all required fields and select an image."
+      );
       return;
     }
 
     try {
       setSaving(true);
 
+      const data = new FormData();
+
+      data.append("title", formData.title);
+      data.append("category", formData.category);
+      data.append("description", formData.description);
+      data.append("condition", formData.condition);
+      data.append("image", formData.image);
+
       await axios.post(
         "http://localhost:3003/api/addItem",
-        formData,
+        data,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -189,10 +225,14 @@ function MyItems() {
       title: item.title || "",
       category: item.category || "",
       description: item.description || "",
-      image: item.image || "",
+      image: null,
       condition: item.condition || "",
     });
 
+    setExistingImage(item.image || "");
+
+    setError("");
+    setSuccess("");
     setShowAddForm(true);
 
     window.scrollTo({
@@ -224,9 +264,21 @@ function MyItems() {
     try {
       setSaving(true);
 
+      const data = new FormData();
+
+      data.append("title", formData.title);
+      data.append("category", formData.category);
+      data.append("description", formData.description);
+      data.append("condition", formData.condition);
+
+      // Only send image if user selected a new one
+      if (formData.image) {
+        data.append("image", formData.image);
+      }
+
       await axios.patch(
         `http://localhost:3003/api/updateItem/${editingItem._id}`,
-        formData,
+        data,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -365,19 +417,7 @@ function MyItems() {
 
             <button
               type="button"
-              onClick={() => {
-                setEditingItem(null);
-
-                setFormData({
-                  title: "",
-                  category: "",
-                  description: "",
-                  image: "",
-                  condition: "",
-                });
-
-                setShowAddForm(true);
-              }}
+              onClick={handleOpenAddForm}
               className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark"
             >
               <Plus size={18} />
@@ -600,17 +640,48 @@ function MyItems() {
               <div>
 
                 <label className="mb-2 block text-sm font-semibold text-text">
-                  Image URL
+                  Item Image
                 </label>
 
                 <input
-                  type="text"
+                  type="file"
                   name="image"
-                  value={formData.image}
+                  accept="image/*"
                   onChange={handleChange}
-                  placeholder="Paste image URL"
-                  className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-primary-dark focus:border-primary focus:ring-4 focus:ring-primary/10"
                 />
+
+                {/* Existing image while editing */}
+
+                {editingItem && existingImage && (
+                  <div className="mt-3">
+
+                    <p className="mb-2 text-xs font-medium text-muted">
+                      Current image
+                    </p>
+
+                    <img
+                      src={existingImage}
+                      alt="Current item"
+                      className="h-24 w-24 rounded-xl object-cover"
+                    />
+
+                  </div>
+                )}
+
+                {/* Newly selected image */}
+
+                {formData.image && (
+                  <p className="mt-2 text-xs text-muted">
+                    Selected: {formData.image.name}
+                  </p>
+                )}
+
+                {editingItem && (
+                  <p className="mt-2 text-xs text-muted">
+                    Leave the image empty to keep the current image.
+                  </p>
+                )}
 
               </div>
 
@@ -715,7 +786,7 @@ function MyItems() {
 
               <button
                 type="button"
-                onClick={() => setShowAddForm(true)}
+                onClick={handleOpenAddForm}
                 className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white"
               >
                 <Plus size={18} />
@@ -727,6 +798,7 @@ function MyItems() {
           ) : (
 
             <>
+
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
                 {paginatedItems.map((item) => (
@@ -745,7 +817,7 @@ function MyItems() {
                         <img
                           src={item.image}
                           alt={item.title}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain p-0.5 transition duration-300 group-hover:scale-105"
                         />
 
                       ) : (

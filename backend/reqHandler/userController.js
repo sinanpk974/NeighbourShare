@@ -6,6 +6,8 @@ import notificationSchema from "../model/notificationmodel.js"
 import bcrypt from 'bcrypt'
 import pkg from 'jsonwebtoken'
 import { createNotification } from "./notificationController.js";
+import cloudinary from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
 
 const {sign} = pkg
 
@@ -217,30 +219,102 @@ export async function updateProfile(req, res) {
     phone,
     village,
     address,
-    profileImage,
   } = req.body;
 
   try {
     const updateData = {};
-    if (name !== undefined) updateData.name = name;
-    if (email !== undefined) updateData.email = email;
-    if (phone !== undefined) updateData.phone = phone;
-    if (village !== undefined) updateData.village = village;
-    if (address !== undefined) updateData.address = address;
-    if (profileImage !== undefined) updateData.profileImage = profileImage;
+
+    if (name !== undefined) {
+      updateData.name = name;
+    }
+
+    if (email !== undefined) {
+      updateData.email = email;
+    }
+
+    if (phone !== undefined) {
+      updateData.phone = phone;
+    }
+
+    if (village !== undefined) {
+      updateData.village = village;
+    }
+
+    if (address !== undefined) {
+      updateData.address = address;
+    }
+
+    // ==========================================
+    // PASSWORD
+    // ==========================================
+
     if (password !== undefined && password.trim() !== "") {
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(
+        password,
+        10
+      );
+
       updateData.password = hashedPassword;
     }
 
-    const updatedUser = await userSchema.findByIdAndUpdate(
-      userId,
-      { $set: updateData },
-      {
-        new: true,
-        runValidators: true,
+    // ==========================================
+    // PROFILE IMAGE
+    // ==========================================
+
+    if (req.file) {
+      const currentUser = await userSchema.findById(
+        userId
+      );
+
+      if (!currentUser) {
+        return res.status(404).send({
+          msg: "User not found",
+        });
       }
-    ).select("-password");
+
+      // Upload new image
+      const cloudinaryResult =
+        await uploadToCloudinary(
+          req.file.buffer,
+          "neighbourshare/profiles"
+        );
+
+      updateData.profileImage =
+        cloudinaryResult.secure_url;
+
+      updateData.profileImagePublicId =
+        cloudinaryResult.public_id;
+
+      // Delete old Cloudinary image
+      if (currentUser.profileImagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(
+            currentUser.profileImagePublicId
+          );
+        } catch (cloudinaryError) {
+          console.log(
+            "Old profile image deletion error:",
+            cloudinaryError.message
+          );
+        }
+      }
+    }
+
+    // ==========================================
+    // UPDATE USER
+    // ==========================================
+
+    const updatedUser =
+      await userSchema.findByIdAndUpdate(
+        userId,
+        {
+          $set: updateData,
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      ).select("-password");
 
     if (!updatedUser) {
       return res.status(404).send({
@@ -254,12 +328,13 @@ export async function updateProfile(req, res) {
     });
 
   } catch (err) {
+    console.log("Update profile error:", err);
+
     res.status(500).send({
       msg: err.message,
     });
   }
 }
-
 export async function deleteAccount(req, res) {
   const userId = req.user.UserID;
 

@@ -7,6 +7,7 @@ import * as ad from './reqHandler/adminController.js'
 import * as rk from './reqHandler/notificationController.js'
 import { Auth } from "./middleware/authentication.js";
 import AdminAuth from "./middleware/adminAuth.js"
+import upload from "./middleware/upload.js";
 
 
 
@@ -16,17 +17,17 @@ router.route('/register').post(rh.Register)
 router.route('/login').post(rh.Login)
 router.post("/check-verification",rh.checkVerificationStatus);
 router.route('/myProfile').get(Auth,rh.getmyProfile)
-router.route('/updateProfile').patch(Auth,rh.updateProfile)
+router.route("/updateProfile").patch(Auth,upload.single("profileImage"),rh.updateProfile);
 router.route('/deleteAccount').delete(Auth,rh.deleteAccount)
 router.route('/profilePublic/:id').get(Auth,rh.getPublicProfile)
 router.route('/profileContact/:id').get(Auth,rh.getContactDetails)
 
-router.route('/addItem').post(Auth,ri.addItem)
+router.route("/addItem").post(Auth, upload.single("image"), ri.addItem);
 router.route('/getItems').get(ri.getItems)
 router.route("/item/:id").get(Auth, ri.getSingleItem);
 router.route('/myItems').get(Auth,ri.getMyItems)
-router.route('/updateItem/:id').patch(Auth,ri.updateItem)
-router.route('/deleteItem/:id').delete(Auth,ri.deleteItem)
+router.route("/updateItem/:id").patch(Auth, upload.single("image"), ri.updateItem);
+router.route("/deleteItem/:id").delete(Auth, ri.deleteItem);
 router.route('/search').get(ri.searchItems)
 
 router.route("/request/:itemId").post(Auth,rr.sendRequest);
@@ -67,6 +68,6 @@ router.route('/admin/pending-deletions').get(Auth,AdminAuth,ad.getPendingDeletio
 router.route('/approveDeletion/:id').patch(Auth,AdminAuth, ad.approveDeletion);
 router.route('/rejectDeletion/:id').patch(Auth, AdminAuth, ad.rejectDeletion);
 router.route("/admin/profile").get(Auth, AdminAuth, ad.getAdminProfile);
-router.route("/admin/profile").patch(Auth,AdminAuth,rh.updateProfile);
+router.route("/updateProfile").patch(Auth,AdminAuth,upload.single("profileImage"),rh.updateProfile);
 
 export default router
