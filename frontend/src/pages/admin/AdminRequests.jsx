@@ -46,7 +46,7 @@ function AdminRequest() {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        "http://localhost:3003/api/admin/requests",
+        "http://https://neighbourshare-i2wq.onrender.com/api/admin/requests",
         {
           headers: {
             Authorization: `Bearer ${token}`,

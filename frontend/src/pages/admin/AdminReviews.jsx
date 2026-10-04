@@ -36,7 +36,7 @@ function AdminReviews() {
         setLoading(true);
 
         const response = await axios.get(
-          "http://localhost:3003/api/admin/reviews",
+          "http://https://neighbourshare-i2wq.onrender.com/api/admin/reviews",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -86,7 +86,7 @@ function AdminReviews() {
       setDeletingId(id);
 
       await axios.delete(
-        `http://localhost:3003/api/admin/reviews/${id}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/admin/reviews/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

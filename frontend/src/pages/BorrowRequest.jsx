@@ -47,7 +47,7 @@ function BorrowRequest() {
         setError("");
 
         const itemResponse = await axios.get(
-          `http://localhost:3003/api/item/${itemId}`,
+          `http://https://neighbourshare-i2wq.onrender.com/api/item/${itemId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ function BorrowRequest() {
               : itemData.owner;
 
           const ownerResponse = await axios.get(
-            `http://localhost:3003/api/profilePublic/${ownerId}`,
+            `http://https://neighbourshare-i2wq.onrender.com/api/profilePublic/${ownerId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -127,7 +127,7 @@ function BorrowRequest() {
       setSubmitting(true);
 
       const response = await axios.post(
-        `http://localhost:3003/api/request/${itemId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/request/${itemId}`,
         {
           message,
           expectedReturnDate,

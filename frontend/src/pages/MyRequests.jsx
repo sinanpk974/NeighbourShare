@@ -174,12 +174,12 @@ function MyRequests() {
         const [sentResponse, receivedResponse] =
           await Promise.all([
             axios.get(
-              "http://localhost:3003/api/myRequests",
+              "http://https://neighbourshare-i2wq.onrender.com/api/myRequests",
               { headers }
             ),
 
             axios.get(
-              "http://localhost:3003/api/receivedRequests",
+              "http://https://neighbourshare-i2wq.onrender.com/api/receivedRequests",
               { headers }
             ),
           ]);
@@ -290,7 +290,7 @@ function MyRequests() {
       setLoadingContactId(requestId);
 
       const response = await axios.get(
-        `http://localhost:3003/api/profileContact/${ownerId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/profileContact/${ownerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -327,7 +327,7 @@ function MyRequests() {
   const handleAccept = async (requestId) => {
     try {
       await axios.patch(
-        `http://localhost:3003/api/acceptRequest/${requestId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/acceptRequest/${requestId}`,
         {},
         {
           headers: {
@@ -358,7 +358,7 @@ function MyRequests() {
   const handleReject = async (requestId) => {
     try {
       await axios.patch(
-        `http://localhost:3003/api/rejectRequest/${requestId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/rejectRequest/${requestId}`,
         {},
         {
           headers: {
@@ -388,7 +388,7 @@ function MyRequests() {
   const handleReturn = async (requestId) => {
     try {
       await axios.patch(
-        `http://localhost:3003/api/return/${requestId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/return/${requestId}`,
         {},
         {
           headers: {
@@ -507,7 +507,7 @@ function MyRequests() {
       setShowViewReview(true);
 
       const response = await axios.get(
-        `http://localhost:3003/api/reviewsByRequest/${request._id}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/reviewsByRequest/${request._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -557,7 +557,7 @@ function MyRequests() {
       setLoadingBorrowerReviews(true);
 
       const response = await axios.get(
-        `http://localhost:3003/api/userReviews/${borrower._id}`
+        `http://https://neighbourshare-i2wq.onrender.com/api/userReviews/${borrower._id}`
       );
 
       setBorrowerReviews(response.data);

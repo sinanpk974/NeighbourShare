@@ -193,7 +193,7 @@ function Notifications() {
       setLoading(true);
 
       const response = await axios.get(
-        "http://localhost:3003/api/notifications",
+        "http://https://neighbourshare-i2wq.onrender.com/api/notifications",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -225,7 +225,7 @@ function Notifications() {
       return;
     }
 
-    const socket = io("http://localhost:3003");
+    const socket = io("http://https://neighbourshare-i2wq.onrender.com");
 
     socket.on("connect", () => {
       console.log(
@@ -299,7 +299,7 @@ function Notifications() {
         setActionLoading(notification._id);
 
         await axios.patch(
-          `http://localhost:3003/api/notifications/${notification._id}/read`,
+          `http://https://neighbourshare-i2wq.onrender.com/api/notifications/${notification._id}/read`,
           {},
           {
             headers: {
@@ -425,7 +425,7 @@ function Notifications() {
       setMarkingAll(true);
 
       await axios.patch(
-        "http://localhost:3003/api/notifications/read-all",
+        "http://https://neighbourshare-i2wq.onrender.com/api/notifications/read-all",
         {},
         {
           headers: {

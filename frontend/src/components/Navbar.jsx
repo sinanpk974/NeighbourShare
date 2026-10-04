@@ -60,7 +60,7 @@ function Navbar() {
       }
 
       const response = await axios.get(
-        "http://localhost:3003/api/notifications/unread-count",
+        "http://https://neighbourshare-i2wq.onrender.com/api/notifications/unread-count",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -100,7 +100,7 @@ function Navbar() {
     getUnreadNotificationCount();
 
     // Connect to Socket.IO
-    const socket = io("http://localhost:3003");
+    const socket = io("http://https://neighbourshare-i2wq.onrender.com");
 
     socket.on("connect", () => {
       console.log(

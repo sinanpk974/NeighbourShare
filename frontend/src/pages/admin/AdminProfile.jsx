@@ -50,7 +50,7 @@ function AdminProfile() {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        "http://localhost:3003/api/admin/profile",
+        "http://https://neighbourshare-i2wq.onrender.com/api/admin/profile",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -153,7 +153,7 @@ function AdminProfile() {
       }
 
       const response = await axios.patch(
-        "http://localhost:3003/api/updateProfile",
+        "http://https://neighbourshare-i2wq.onrender.com/api/updateProfile",
         data,
         {
           headers: {

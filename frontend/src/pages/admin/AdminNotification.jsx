@@ -38,7 +38,7 @@ function AdminNotification() {
       setLoading(true);
 
       const response = await axios.get(
-        "http://localhost:3003/api/notifications",
+        "http://https://neighbourshare-i2wq.onrender.com/api/notifications",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -63,7 +63,7 @@ function AdminNotification() {
   const markAsRead = async (notificationId) => {
     try {
       await axios.patch(
-        `http://localhost:3003/api/notifications/${notificationId}/read`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/notifications/${notificationId}/read`,
         {},
         {
           headers: {
@@ -93,7 +93,7 @@ function AdminNotification() {
       setActionLoading(true);
 
       await axios.patch(
-        "http://localhost:3003/api/notifications/read-all",
+        "http://https://neighbourshare-i2wq.onrender.com/api/notifications/read-all",
         {},
         {
           headers: {

@@ -65,7 +65,7 @@ function MyItems() {
       setLoading(true);
 
       const response = await axios.get(
-        "http://localhost:3003/api/myItems",
+        "http://https://neighbourshare-i2wq.onrender.com/api/myItems",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -188,7 +188,7 @@ function MyItems() {
       data.append("image", formData.image);
 
       await axios.post(
-        "http://localhost:3003/api/addItem",
+        "http://https://neighbourshare-i2wq.onrender.com/api/addItem",
         data,
         {
           headers: {
@@ -277,7 +277,7 @@ function MyItems() {
       }
 
       await axios.patch(
-        `http://localhost:3003/api/updateItem/${editingItem._id}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/updateItem/${editingItem._id}`,
         data,
         {
           headers: {
@@ -319,7 +319,7 @@ function MyItems() {
       setSuccess("");
 
       await axios.delete(
-        `http://localhost:3003/api/deleteItem/${id}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/deleteItem/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -351,7 +351,7 @@ function MyItems() {
       setReviews([]);
 
       const response = await axios.get(
-        `http://localhost:3003/api/itemReview/${item._id}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/itemReview/${item._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

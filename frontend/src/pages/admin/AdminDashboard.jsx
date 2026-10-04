@@ -31,7 +31,7 @@ function AdminDashboard() {
         setLoading(true);
 
         const response = await axios.get(
-          "http://localhost:3003/api/admin/dashboard",
+          "http://https://neighbourshare-i2wq.onrender.com/api/admin/dashboard",
           {
             headers: {
               Authorization: `Bearer ${token}`,

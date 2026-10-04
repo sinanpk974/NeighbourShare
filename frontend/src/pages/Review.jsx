@@ -45,7 +45,7 @@ function ReviewModal({
       setLoading(true);
 
       const response = await axios.post(
-        `http://localhost:3003/api/review/${request._id}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/review/${request._id}`,
         {
           type: reviewType,
           rating,

@@ -47,7 +47,7 @@ function AdminItems() {
       setLoading(true);
 
       const response = await axios.get(
-        "http://localhost:3003/api/getItems"
+        "http://https://neighbourshare-i2wq.onrender.com/api/getItems"
       );
 
       setItems(response.data || []);
@@ -72,7 +72,7 @@ function AdminItems() {
       setLoadingOwner(itemId);
 
       const response = await axios.get(
-        `http://localhost:3003/api/admin/users/${ownerId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/admin/users/${ownerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -81,7 +81,7 @@ function AdminItems() {
       );
 
       const reviewsResponse = await axios.get(
-        `http://localhost:3003/api/userReview/${ownerId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/userReview/${ownerId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -121,7 +121,7 @@ function AdminItems() {
       setDeleting(true);
 
       await axios.delete(
-        `http://localhost:3003/api/admin/items/${itemId}`,
+        `http://https://neighbourshare-i2wq.onrender.com/api/admin/items/${itemId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

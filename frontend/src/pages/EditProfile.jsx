@@ -46,7 +46,7 @@ function EditProfile() {
       setError("");
 
       const response = await axios.get(
-        "http://localhost:3003/api/myProfile",
+        "http://https://neighbourshare-i2wq.onrender.com/api/myProfile",
         {
           headers,
         }
@@ -127,7 +127,7 @@ function EditProfile() {
       }
 
       const response = await axios.patch(
-        "http://localhost:3003/api/updateProfile",
+        "http://https://neighbourshare-i2wq.onrender.com/api/updateProfile",
         data,
         {
           headers,

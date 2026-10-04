@@ -50,7 +50,7 @@ function ItemDetails() {
         setError("");
 
         const itemResponse = await axios.get(
-          `http://localhost:3003/api/item/${id}`,
+          `http://https://neighbourshare-i2wq.onrender.com/api/item/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -63,7 +63,7 @@ function ItemDetails() {
         setItem(itemData);
 
         const reviewResponse = await axios.get(
-          `http://localhost:3003/api/itemReview/${id}`,
+          `http://https://neighbourshare-i2wq.onrender.com/api/itemReview/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@ function ItemDetails() {
               : itemData.owner;
 
           const ownerResponse = await axios.get(
-            `http://localhost:3003/api/profilePublic/${ownerId}`,
+            `http://https://neighbourshare-i2wq.onrender.com/api/profilePublic/${ownerId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
