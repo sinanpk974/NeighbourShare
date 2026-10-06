@@ -18,7 +18,12 @@ const server = http.createServer(app);
 initializeSocket(server);
 
 // Express middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://neighbourshare-chi.vercel.app",
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "50mb" }));
 
 // API routes
