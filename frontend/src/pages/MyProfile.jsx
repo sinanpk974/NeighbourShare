@@ -72,31 +72,31 @@ function MyProfile() {
         reviewsResponse,
       ] = await Promise.all([
         axios.get(
-          "http://https://neighbourshare-i2wq.onrender.com/api/myProfile",
+          "https://neighbourshare-i2wq.onrender.com/api/myProfile",
           {
             headers,
           }
         ),
         axios.get(
-          "http://https://neighbourshare-i2wq.onrender.com/api/myItems",
+          "https://neighbourshare-i2wq.onrender.com/api/myItems",
           {
             headers,
           }
         ),
         axios.get(
-          "http://https://neighbourshare-i2wq.onrender.com/api/myRequests",
+          "https://neighbourshare-i2wq.onrender.com/api/myRequests",
           {
             headers,
           }
         ),
         axios.get(
-          "http://https://neighbourshare-i2wq.onrender.com/api/receivedRequests",
+          "https://neighbourshare-i2wq.onrender.com/api/receivedRequests",
           {
             headers,
           }
         ),
         axios.get(
-          "http://https://neighbourshare-i2wq.onrender.com/api/myReviews",
+          "https://neighbourshare-i2wq.onrender.com/api/myReviews",
           {
             headers,
           }
@@ -141,7 +141,7 @@ function MyProfile() {
       setDeleting(true);
 
       const response = await axios.delete(
-        "http://https://neighbourshare-i2wq.onrender.com/api/deleteAccount",
+        "https://neighbourshare-i2wq.onrender.com/api/deleteAccount",
         {
           headers,
         }

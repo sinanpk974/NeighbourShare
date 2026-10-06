@@ -47,7 +47,7 @@ function Login() {
       setLoading(true);
 
       const response = await axios.post(
-        "http://https://neighbourshare-i2wq.onrender.com/api/login",
+        "https://neighbourshare-i2wq.onrender.com/api/login",
         formData
       );
 
@@ -65,7 +65,7 @@ if (response.data.role === "admin") {
   return;
 }
       const itemsResponse = await axios.get(
-        "http://https://neighbourshare-i2wq.onrender.com/api/myItems",
+        "https://neighbourshare-i2wq.onrender.com/api/myItems",
         {
           headers: {
             Authorization: `Bearer ${token}`,

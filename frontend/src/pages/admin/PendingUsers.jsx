@@ -42,12 +42,12 @@ function PendingUsers() {
       const [usersResponse, deletionsResponse] =
         await Promise.all([
           axios.get(
-            "http://https://neighbourshare-i2wq.onrender.com/api/admin/pending-users",
+            "https://neighbourshare-i2wq.onrender.com/api/admin/pending-users",
             { headers }
           ),
 
           axios.get(
-            "http://https://neighbourshare-i2wq.onrender.com/api/admin/pending-deletions",
+            "https://neighbourshare-i2wq.onrender.com/api/admin/pending-deletions",
             { headers }
           ),
         ]);
@@ -140,7 +140,7 @@ function PendingUsers() {
       setActionLoading(`verify-${userId}`);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/admin/users/${userId}/verify`,
+        `https://neighbourshare-i2wq.onrender.com/api/admin/users/${userId}/verify`,
         {},
         { headers }
       );
@@ -178,7 +178,7 @@ function PendingUsers() {
       setActionLoading(`reject-user-${userId}`);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/admin/users/${userId}/reject`,
+        `https://neighbourshare-i2wq.onrender.com/api/admin/users/${userId}/reject`,
         {},
         { headers }
       );
@@ -216,7 +216,7 @@ function PendingUsers() {
       setActionLoading(`approve-${userId}`);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/approveDeletion/${userId}`,
+        `https://neighbourshare-i2wq.onrender.com/api/approveDeletion/${userId}`,
         {},
         { headers }
       );
@@ -254,7 +254,7 @@ function PendingUsers() {
       setActionLoading(`reject-${userId}`);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/rejectDeletion/${userId}`,
+        `https://neighbourshare-i2wq.onrender.com/api/rejectDeletion/${userId}`,
         {},
         { headers }
       );

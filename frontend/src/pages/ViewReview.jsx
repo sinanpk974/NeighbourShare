@@ -43,7 +43,7 @@ function ViewReview() {
         setError("");
 
         const response = await axios.get(
-          `http://https://neighbourshare-i2wq.onrender.com/api/reviewById/${reviewId}`,
+          `https://neighbourshare-i2wq.onrender.com/api/reviewById/${reviewId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

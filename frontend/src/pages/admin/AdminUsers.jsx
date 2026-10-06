@@ -57,7 +57,7 @@ export default function AdminUsers() {
       setLoading(true);
 
       const response = await axios.get(
-        "http://https://neighbourshare-i2wq.onrender.com/api/admin/users",
+        "https://neighbourshare-i2wq.onrender.com/api/admin/users",
         { headers }
       );
 
@@ -120,7 +120,7 @@ export default function AdminUsers() {
       setActionLoading(true);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/verify`,
+        `https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/verify`,
         {},
         { headers }
       );
@@ -150,7 +150,7 @@ export default function AdminUsers() {
       setActionLoading(true);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/reject`,
+        `https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/reject`,
         {},
         { headers }
       );
@@ -180,7 +180,7 @@ export default function AdminUsers() {
       setActionLoading(true);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/block`,
+        `https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/block`,
         {},
         { headers }
       );
@@ -209,7 +209,7 @@ export default function AdminUsers() {
       setActionLoading(true);
 
       await axios.patch(
-        `http://https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/unblock`,
+        `https://neighbourshare-i2wq.onrender.com/api/admin/users/${id}/unblock`,
         {},
         { headers }
       );
@@ -240,7 +240,7 @@ export default function AdminUsers() {
       setActionLoading(true);
 
       await axios.delete(
-        `http://https://neighbourshare-i2wq.onrender.com/api/admin/delusers/${userToDelete._id}`,
+        `https://neighbourshare-i2wq.onrender.com/api/admin/delusers/${userToDelete._id}`,
         { headers }
       );
 

@@ -78,7 +78,7 @@ function Register() {
       setLoading(true);
 
       const response = await axios.post(
-        "http://https://neighbourshare-i2wq.onrender.com/api/register",
+        "https://neighbourshare-i2wq.onrender.com/api/register",
         formData
       );
 
@@ -121,7 +121,7 @@ function Register() {
       setError("");
 
       const response = await axios.post(
-        "http://https://neighbourshare-i2wq.onrender.com/api/check-verification",
+        "https://neighbourshare-i2wq.onrender.com/api/check-verification",
         {
           email: registeredEmail,
         }

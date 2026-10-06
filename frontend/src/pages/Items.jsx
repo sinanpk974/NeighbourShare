@@ -51,7 +51,7 @@ function Items() {
     if (categoryFromUrl) {
       if (categoryFromUrl.toLowerCase() === "others") {
         axios
-          .get("http://https://neighbourshare-i2wq.onrender.com/api/getItems")
+          .get("https://neighbourshare-i2wq.onrender.com/api/getItems")
           .then((res) => {
             const excludedCategories = [
               "tools",
@@ -82,7 +82,7 @@ function Items() {
       }
 
       axios
-        .get("http://https://neighbourshare-i2wq.onrender.com/api/search", {
+        .get("https://neighbourshare-i2wq.onrender.com/api/search", {
           params: {
             category: categoryFromUrl,
           },
@@ -110,7 +110,7 @@ function Items() {
     if (search.trim()) {
       const timer = setTimeout(() => {
         axios
-          .get("http://https://neighbourshare-i2wq.onrender.com/api/search", {
+          .get("https://neighbourshare-i2wq.onrender.com/api/search", {
             params: {
               title: search.trim(),
             },
@@ -137,7 +137,7 @@ function Items() {
     }
 
     axios
-      .get("http://https://neighbourshare-i2wq.onrender.com/api/getItems")
+      .get("https://neighbourshare-i2wq.onrender.com/api/getItems")
       .then((res) => {
         setItems(res.data);
       })

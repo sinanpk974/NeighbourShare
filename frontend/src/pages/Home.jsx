@@ -26,7 +26,7 @@ function Home() {
 
   useEffect(() => {
     axios
-      .get("http://https://neighbourshare-i2wq.onrender.com/api/getItems")
+      .get("https://neighbourshare-i2wq.onrender.com/api/getItems")
       .then((res) => {
         console.log(res.data);
         setItems(res.data);

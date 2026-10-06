@@ -82,7 +82,7 @@ function AdminNavbar({ setMobileOpen }) {
       if (!token) return;
 
       const response = await axios.get(
-        "http://https://neighbourshare-i2wq.onrender.com/api/notifications/unread-count",
+        "https://neighbourshare-i2wq.onrender.com/api/notifications/unread-count",
         {
           headers: {
             Authorization: `Bearer ${token}`,
