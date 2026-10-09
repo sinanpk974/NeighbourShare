@@ -5,8 +5,12 @@ let io;
 export function initializeSocket(server) {
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: [
+        "http://localhost:5173",
+        "https://neighbourshare-chi.vercel.app",
+      ],
       methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+      credentials: true,
     },
   });
 
@@ -20,16 +24,11 @@ export function initializeSocket(server) {
 
       socket.join(roomName);
 
-      console.log(
-        `User ${userId} joined notification room`
-      );
+      console.log(`User ${userId} joined notification room`);
     });
 
     socket.on("disconnect", () => {
-      console.log(
-        "Socket disconnected:",
-        socket.id
-      );
+      console.log("Socket disconnected:", socket.id);
     });
   });
 
@@ -38,9 +37,7 @@ export function initializeSocket(server) {
 
 export function getIO() {
   if (!io) {
-    throw new Error(
-      "Socket.IO has not been initialized"
-    );
+    throw new Error("Socket.IO has not been initialized");
   }
 
   return io;
