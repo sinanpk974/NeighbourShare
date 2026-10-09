@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -31,9 +32,7 @@ function getUserIdFromToken(token) {
   try {
     if (!token) return null;
 
-    const payload = JSON.parse(
-      atob(token.split(".")[1])
-    );
+    const payload = JSON.parse(atob(token.split(".")[1]));
 
     return payload.UserID || payload.userId || payload.id || null;
   } catch {
@@ -188,60 +187,63 @@ function Notifications() {
     startIndex + NOTIFICATIONS_PER_PAGE
   );
 
-  const getNotifications = useCallback(async (showRefresh = false) => {
-    try {
-      if (showRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+  const getNotifications = useCallback(
+    async (showRefresh = false) => {
+      try {
+        if (showRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
 
-      setErrorMessage("");
+        setErrorMessage("");
 
-      let response;
+        let response;
 
-      if (token) {
-        response = await axios.get(`${API_URL}/notifications`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } else if (registrationStatusToken) {
-        response = await axios.get(
-          `${API_URL}/notifications/registration-status`,
-          {
+        if (token) {
+          response = await axios.get(`${API_URL}/notifications`, {
             headers: {
-              Authorization: `Bearer ${registrationStatusToken}`,
+              Authorization: `Bearer ${token}`,
             },
-          }
+          });
+        } else if (registrationStatusToken) {
+          response = await axios.get(
+            `${API_URL}/notifications/registration-status`,
+            {
+              headers: {
+                Authorization: `Bearer ${registrationStatusToken}`,
+              },
+            }
+          );
+        } else {
+          setNotifications([]);
+          setErrorMessage(
+            "Please log in to view notifications. If you recently registered, return to the registration page and open your verification notifications."
+          );
+          return;
+        }
+
+        setNotifications(response.data?.notifications || []);
+        setCurrentPage(1);
+      } catch (error) {
+        console.error(
+          "Get notifications error:",
+          error.response?.data || error.message
         );
-      } else {
+
         setNotifications([]);
+
         setErrorMessage(
-          "Please log in to view notifications. If you recently registered, return to the registration page and open your verification notifications."
+          error.response?.data?.message ||
+            "Unable to load notifications. Please try again."
         );
-        return;
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      setNotifications(response.data?.notifications || []);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error(
-        "Get notifications error:",
-        error.response?.data || error.message
-      );
-
-      setNotifications([]);
-
-      setErrorMessage(
-        error.response?.data?.message ||
-          "Unable to load notifications. Please try again."
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [token, registrationStatusToken]);
+    },
+    [token, registrationStatusToken]
+  );
 
   useEffect(() => {
     getNotifications();
@@ -290,6 +292,13 @@ function Notifications() {
   }, [token]);
 
   async function handleNotificationClick(notification) {
+    // Registration-status visitors go to Login.
+    if (!token && registrationStatusToken) {
+      navigate("/login");
+      return;
+    }
+
+    // Normal logged-in user notification handling.
     if (!token || !notification?._id) return;
 
     setActionLoading(notification._id);
@@ -397,7 +406,6 @@ function Notifications() {
   return (
     <div className="min-h-screen bg-[#FAFAF7] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
-
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
@@ -504,7 +512,6 @@ function Notifications() {
             </p>
           </div>
         ) : notifications.length === 0 ? (
-
           /* Empty state */
           <div className="rounded-2xl border border-gray-100 bg-white px-6 py-16 text-center shadow-sm">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-50">
@@ -552,13 +559,8 @@ function Notifications() {
 
               <div className="divide-y divide-gray-100">
                 {currentNotifications.map((notification) => {
-                  const Icon = getNotificationIcon(
-                    notification.type
-                  );
-
-                  const iconColor = getNotificationColor(
-                    notification.type
-                  );
+                  const Icon = getNotificationIcon(notification.type);
+                  const iconColor = getNotificationColor(notification.type);
 
                   const notificationIsBusy =
                     actionLoading === notification._id;
@@ -604,12 +606,10 @@ function Notifications() {
                         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                           <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
                             <Clock size={13} />
-                            {formatNotificationTime(
-                              notification.createdAt
-                            )}
+                            {formatNotificationTime(notification.createdAt)}
                           </span>
 
-                          {token && (
+                          {(token || registrationStatusToken) && (
                             <button
                               type="button"
                               onClick={() =>
@@ -631,9 +631,11 @@ function Notifications() {
 
                               {notificationIsBusy
                                 ? "Please wait..."
-                                : notification.isRead
-                                  ? "View update"
-                                  : "Mark as read"}
+                                : isRegistrationVisitor
+                                  ? "Go to Login"
+                                  : notification.isRead
+                                    ? "View update"
+                                    : "Mark as read"}
                             </button>
                           )}
                         </div>
@@ -651,15 +653,15 @@ function Notifications() {
                   Showing{" "}
                   <span className="font-semibold text-[#1F2937]">
                     {startIndex + 1}
-                  </span>
-                  {" "}to{" "}
+                  </span>{" "}
+                  to{" "}
                   <span className="font-semibold text-[#1F2937]">
                     {Math.min(
                       startIndex + NOTIFICATIONS_PER_PAGE,
                       notifications.length
                     )}
-                  </span>
-                  {" "}of{" "}
+                  </span>{" "}
+                  of{" "}
                   <span className="font-semibold text-[#1F2937]">
                     {notifications.length}
                   </span>
@@ -669,9 +671,7 @@ function Notifications() {
                   <button
                     type="button"
                     onClick={() =>
-                      setCurrentPage((page) =>
-                        Math.max(1, page - 1)
-                      )
+                      setCurrentPage((page) => Math.max(1, page - 1))
                     }
                     disabled={currentPage === 1}
                     className="rounded-lg border border-gray-200 p-2 text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -702,7 +702,6 @@ function Notifications() {
             )}
           </>
         )}
-
       </div>
     </div>
   );
