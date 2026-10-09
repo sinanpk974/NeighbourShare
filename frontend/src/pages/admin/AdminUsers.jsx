@@ -40,7 +40,6 @@ export default function AdminUsers() {
   const [userToDelete, setUserToDelete] = useState(null);
 
   const [actionLoading, setActionLoading] = useState(false);
-
   const [openActionMenu, setOpenActionMenu] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -107,8 +106,7 @@ export default function AdminUsers() {
     filteredUsers.length / USERS_PER_PAGE
   );
 
-  const startIndex =
-    (currentPage - 1) * USERS_PER_PAGE;
+  const startIndex = (currentPage - 1) * USERS_PER_PAGE;
 
   const paginatedUsers = filteredUsers.slice(
     startIndex,
@@ -317,17 +315,11 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
         <div>
           <div className="flex items-center gap-3">
-
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10">
-              <Users
-                size={23}
-                className="text-primary"
-              />
+              <Users size={23} className="text-primary" />
             </div>
 
             <div>
@@ -339,7 +331,6 @@ export default function AdminUsers() {
                 Manage all registered users
               </p>
             </div>
-
           </div>
         </div>
 
@@ -349,15 +340,11 @@ export default function AdminUsers() {
           </span>{" "}
           users
         </div>
-
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4">
-
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
           <div className="relative w-full lg:max-w-md">
-
             <Search
               size={18}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
@@ -373,11 +360,9 @@ export default function AdminUsers() {
               }}
               className="w-full rounded-xl border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-text outline-none transition focus:border-primary"
             />
-
           </div>
 
           <div className="flex flex-wrap gap-2">
-
             {[
               "All",
               "Verified",
@@ -400,35 +385,25 @@ export default function AdminUsers() {
                 {item}
               </button>
             ))}
-
           </div>
-
         </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-card">
-
-        <div className="hidden grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr_auto] gap-4 border-b border-border bg-background px-6 py-4 text-xs font-semibold uppercase tracking-wide text-muted lg:grid">
+        {/* Responsive list header */}
+        <div className="hidden items-center gap-4 border-b border-border bg-background px-5 py-4 text-xs font-semibold uppercase tracking-wide text-muted lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,0.8fr)_minmax(0,0.9fr)_auto] xl:px-6 2xl:gap-6">
           <div>User</div>
           <div>Contact</div>
           <div>Village</div>
-          <div>Address</div>
-          <div>Verification</div>
-          <div>Status</div>
-          <div>Actions</div>
+          <div>Verification / Status</div>
+          <div className="text-right">Actions</div>
         </div>
 
         <div className="divide-y divide-border">
-
           {filteredUsers.length === 0 ? (
-
             <div className="flex min-h-[300px] flex-col items-center justify-center px-6 text-center">
-
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-background">
-                <Users
-                  size={26}
-                  className="text-muted"
-                />
+                <Users size={26} className="text-muted" />
               </div>
 
               <h3 className="mt-4 text-lg font-semibold text-text">
@@ -438,29 +413,20 @@ export default function AdminUsers() {
               <p className="mt-1 text-sm text-muted">
                 Try changing your search or filter.
               </p>
-
             </div>
-
           ) : (
-
-            paginatedUsers.map((user) => (
-
+            paginatedUsers.map((user, index) => (
               <div
                 key={user._id}
-                className="relative p-5 lg:grid lg:grid-cols-[2fr_1.5fr_1fr_1fr_1fr_1fr_auto] lg:items-center lg:gap-4 lg:px-6"
+                className="relative grid grid-cols-1 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,0.8fr)_minmax(0,0.9fr)_auto] lg:items-center lg:gap-4 lg:px-5 xl:px-6 2xl:gap-6"
               >
-
-                <div className="flex items-center gap-3">
-
+                {/* User */}
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <User
-                      size={20}
-                      className="text-primary"
-                    />
+                    <User size={20} className="text-primary" />
                   </div>
 
                   <div className="min-w-0">
-
                     <p className="truncate font-semibold text-text">
                       {user.name || "Unnamed User"}
                     </p>
@@ -468,124 +434,80 @@ export default function AdminUsers() {
                     <p className="truncate text-xs text-muted">
                       ID: {user._id}
                     </p>
-
                   </div>
-
                 </div>
 
-                <div className="mt-4 space-y-1 lg:mt-0">
-
-                  <div className="flex items-center gap-2 text-sm text-text">
-
+                {/* Contact */}
+                <div className="min-w-0 space-y-1">
+                  <div className="flex min-w-0 items-center gap-2 text-sm text-text">
                     <Mail
                       size={14}
                       className="shrink-0 text-muted"
                     />
 
-                    <span className="truncate">
+                    <span className="min-w-0 break-words [overflow-wrap:anywhere]">
                       {user.email || "Not provided"}
                     </span>
-
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-muted">
-
                     <Phone
                       size={14}
                       className="shrink-0"
                     />
 
-                    <span>
+                    <span className="break-words">
                       {user.phone || "Not provided"}
                     </span>
-
                   </div>
-
                 </div>
 
-                <div className="mt-4 lg:mt-0">
+                {/* Village */}
+                <div className="flex min-w-0 items-center gap-2 text-sm text-text">
+                  <Home
+                    size={15}
+                    className="shrink-0 text-muted"
+                  />
 
-                  <div className="flex items-center gap-2 text-sm text-text">
-
-                    <Home
-                      size={15}
-                      className="shrink-0 text-muted"
-                    />
-
-                    <span>
-                      {user.village || "Not provided"}
-                    </span>
-
-                  </div>
-
+                  <span className="break-words">
+                    {user.village || "Not provided"}
+                  </span>
                 </div>
 
-                <div className="mt-4 lg:mt-0">
-
-                  <div className="flex items-start gap-2 text-sm text-text">
-
-                    <MapPin
-                      size={15}
-                      className="mt-0.5 shrink-0 text-muted"
-                    />
-
-                    <span className="line-clamp-2">
-                      {user.address || "Not provided"}
-                    </span>
-
-                  </div>
-
-                </div>
-
-                <div className="mt-4 lg:mt-0">
-
+                {/* Verification and account status */}
+                <div className="flex flex-wrap items-center gap-2 lg:flex-col lg:items-start">
                   {user.verificationStatus === "Verified" ? (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
                       <ShieldCheck size={14} />
                       Verified
                     </span>
-
                   ) : user.verificationStatus === "Rejected" ? (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-danger/10 px-3 py-1.5 text-xs font-semibold text-danger">
                       <ShieldAlert size={14} />
                       Rejected
                     </span>
-
                   ) : (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent">
                       <ShieldAlert size={14} />
                       Pending
                     </span>
-
                   )}
 
-                </div>
-
-                <div className="mt-4 lg:mt-0">
-
                   {user.isBlocked ? (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-danger/10 px-3 py-1.5 text-xs font-semibold text-danger">
                       <Ban size={14} />
                       Blocked
                     </span>
-
                   ) : (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
                       <CheckCircle2 size={14} />
                       Active
                     </span>
-
                   )}
-
                 </div>
 
-                <div className="relative mt-4 flex lg:mt-0 lg:justify-end">
-
+                {/* Actions */}
+                <div className="relative flex min-w-0 items-center justify-start lg:justify-end">
                   <button
                     onClick={() =>
                       setOpenActionMenu(
@@ -601,88 +523,65 @@ export default function AdminUsers() {
                   </button>
 
                   {openActionMenu === user._id && (
-
                     <div
-                      className={`absolute right-0 z-30 w-44 overflow-hidden rounded-xl border border-border bg-card p-1 shadow-lg ${
-                        paginatedUsers.indexOf(user) >=
-                        paginatedUsers.length - 2
+                      className={`absolute right-0 z-30 w-44 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-card p-1 shadow-lg ${
+                        index >= paginatedUsers.length - 2
                           ? "bottom-full mb-2"
                           : "top-full mt-2"
                       }`}
                     >
-
                       <div className="flex items-center justify-between border-b border-border px-2 py-1.5">
-
                         <span className="text-xs font-semibold text-muted">
                           Actions
                         </span>
 
                         <button
-                          onClick={() =>
-                            setOpenActionMenu(null)
-                          }
+                          onClick={() => setOpenActionMenu(null)}
                           className="flex h-7 w-7 items-center justify-center rounded-lg text-muted transition hover:bg-background hover:text-text"
                         >
                           <X size={16} />
                         </button>
-
                       </div>
 
                       <button
-                        onClick={() =>
-                          handleViewUser(user)
-                        }
+                        onClick={() => handleViewUser(user)}
                         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text transition hover:bg-background"
                       >
-                        <Eye
-                          size={16}
-                          className="text-primary"
-                        />
+                        <Eye size={16} className="text-primary" />
                         View
                       </button>
 
                       {user.verificationStatus === "Pending" && (
+                        <>
+                          <button
+                            onClick={() => handleVerify(user._id)}
+                            disabled={actionLoading}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text transition hover:bg-background disabled:opacity-50"
+                          >
+                            <ShieldCheck
+                              size={16}
+                              className="text-success"
+                            />
+                            Verify
+                          </button>
 
-                        <button
-                          onClick={() =>
-                            handleVerify(user._id)
-                          }
-                          disabled={actionLoading}
-                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text transition hover:bg-background disabled:opacity-50"
-                        >
-                          <ShieldCheck
-                            size={16}
-                            className="text-success"
-                          />
-                          Verify
-                        </button>
-
-                      )}
-
-                      {user.verificationStatus === "Pending" && (
-
-                        <button
-                          onClick={() =>
-                            handleReject(user._id)
-                          }
-                          disabled={actionLoading}
-                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text transition hover:bg-background disabled:opacity-50"
-                        >
-                          <ShieldAlert
-                            size={16}
-                            className="text-danger"
-                          />
-                          Reject
-                        </button>
-
+                          <button
+                            onClick={() => handleReject(user._id)}
+                            disabled={actionLoading}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text transition hover:bg-background disabled:opacity-50"
+                          >
+                            <ShieldAlert
+                              size={16}
+                              className="text-danger"
+                            />
+                            Reject
+                          </button>
+                        </>
                       )}
 
                       {user.isBlocked ? (
-
                         <button
-                          onClick={() =>
-                            handleUnblock(user._id)
-                          }
+                          onClick={() => handleUnblock(user._id)}
                           disabled={actionLoading}
                           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text transition hover:bg-background disabled:opacity-50"
                         >
@@ -692,13 +591,9 @@ export default function AdminUsers() {
                           />
                           Unblock
                         </button>
-
                       ) : (
-
                         <button
-                          onClick={() =>
-                            handleBlock(user._id)
-                          }
+                          onClick={() => handleBlock(user._id)}
                           disabled={actionLoading}
                           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-text transition hover:bg-background disabled:opacity-50"
                         >
@@ -708,52 +603,39 @@ export default function AdminUsers() {
                           />
                           Block
                         </button>
-
                       )}
 
                       <button
-                        onClick={() =>
-                          openDeleteModal(user)
-                        }
+                        onClick={() => openDeleteModal(user)}
                         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-danger transition hover:bg-danger/5"
                       >
                         <Trash2 size={16} />
                         Delete
                       </button>
-
                     </div>
-
                   )}
-
                 </div>
-
               </div>
-
             ))
-
           )}
-
         </div>
       </div>
 
+      {/* Pagination */}
       {filteredUsers.length > 0 && totalPages > 1 && (
-
-        <div className="flex items-center justify-center gap-3 mt-8">
-
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() =>
-              setCurrentPage((prev) =>
-                Math.max(prev - 1, 1)
-              )
+              setCurrentPage((prev) => Math.max(prev - 1, 1))
             }
             disabled={currentPage === 1}
-            className="px-5 py-2.5 rounded-xl border border-border bg-card text-text text-sm font-medium transition hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-text transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
           >
             Previous
           </button>
 
-          <span className="px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-semibold">
+          <span className="rounded-xl bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary">
             {currentPage} / {totalPages}
           </span>
 
@@ -765,25 +647,19 @@ export default function AdminUsers() {
               )
             }
             disabled={currentPage === totalPages}
-            className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-medium transition hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
           >
             More
           </button>
-
         </div>
-
       )}
 
+      {/* User Details Modal */}
       {selectedUser && (
-
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-border bg-card shadow-2xl">
-
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
-
               <div>
-
                 <h2 className="text-xl font-bold text-text">
                   User Details
                 </h2>
@@ -791,7 +667,6 @@ export default function AdminUsers() {
                 <p className="mt-1 text-sm text-muted">
                   Complete information about this user
                 </p>
-
               </div>
 
               <button
@@ -800,287 +675,193 @@ export default function AdminUsers() {
               >
                 <X size={18} />
               </button>
-
             </div>
 
             <div className="space-y-6 p-6">
-
               <div className="flex items-center gap-4">
-
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <User
-                    size={30}
-                    className="text-primary"
-                  />
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <User size={30} className="text-primary" />
                 </div>
 
-                <div>
-
+                <div className="min-w-0">
                   <h3 className="text-xl font-bold text-text">
                     {selectedUser.name || "Unnamed User"}
                   </h3>
 
-                  <p className="text-sm text-muted">
+                  <p className="break-words text-sm text-muted">
                     {selectedUser.email || "No email"}
                   </p>
-
                 </div>
-
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-
-                <div className="flex items-start gap-3">
-
+                <div className="flex min-w-0 items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
-                    <Mail
-                      size={18}
-                      className="text-primary"
-                    />
+                    <Mail size={18} className="text-primary" />
                   </div>
 
-                  <div>
-
+                  <div className="min-w-0">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted">
                       Email
                     </p>
 
-                    <p className="mt-1 text-sm text-text">
-                      {selectedUser.email ||
-                        "Not provided"}
+                    <p className="mt-1 break-words text-sm text-text">
+                      {selectedUser.email || "Not provided"}
                     </p>
-
                   </div>
-
                 </div>
 
                 <div className="flex items-start gap-3">
-
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
-                    <Phone
-                      size={18}
-                      className="text-primary"
-                    />
+                    <Phone size={18} className="text-primary" />
                   </div>
 
                   <div>
-
                     <p className="text-xs font-medium uppercase tracking-wide text-muted">
                       Phone
                     </p>
 
                     <p className="mt-1 text-sm text-text">
-                      {selectedUser.phone ||
-                        "Not provided"}
+                      {selectedUser.phone || "Not provided"}
                     </p>
-
                   </div>
-
                 </div>
 
                 <div className="flex items-start gap-3">
-
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
-                    <Home
-                      size={18}
-                      className="text-primary"
-                    />
+                    <Home size={18} className="text-primary" />
                   </div>
 
                   <div>
-
                     <p className="text-xs font-medium uppercase tracking-wide text-muted">
                       Village
                     </p>
 
                     <p className="mt-1 text-sm text-text">
-                      {selectedUser.village ||
-                        "Not provided"}
+                      {selectedUser.village || "Not provided"}
                     </p>
-
                   </div>
-
                 </div>
 
-                <div className="flex items-start gap-3">
-
+                <div className="flex min-w-0 items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-background">
-                    <MapPin
-                      size={18}
-                      className="text-primary"
-                    />
+                    <MapPin size={18} className="text-primary" />
                   </div>
 
-                  <div>
-
+                  <div className="min-w-0">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted">
                       Address
                     </p>
 
-                    <p className="mt-1 text-sm text-text">
-                      {selectedUser.address ||
-                        "Not provided"}
+                    <p className="mt-1 break-words text-sm text-text">
+                      {selectedUser.address || "Not provided"}
                     </p>
-
                   </div>
-
                 </div>
-
               </div>
 
               <div className="rounded-2xl border border-border bg-background p-4">
-
                 <h3 className="mb-3 text-sm font-semibold text-text">
                   Account Status
                 </h3>
 
                 <div className="flex flex-wrap gap-2">
-
-                  {selectedUser.verificationStatus ===
-                  "Verified" ? (
-
+                  {selectedUser.verificationStatus === "Verified" ? (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
                       <ShieldCheck size={14} />
                       Verified
                     </span>
-
-                  ) : selectedUser.verificationStatus ===
-                    "Rejected" ? (
-
+                  ) : selectedUser.verificationStatus === "Rejected" ? (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-danger/10 px-3 py-1.5 text-xs font-semibold text-danger">
                       <ShieldAlert size={14} />
                       Rejected
                     </span>
-
                   ) : (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent">
                       <ShieldAlert size={14} />
                       Pending
                     </span>
-
                   )}
 
                   {selectedUser.isBlocked ? (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-danger/10 px-3 py-1.5 text-xs font-semibold text-danger">
                       <Ban size={14} />
                       Blocked
                     </span>
-
                   ) : (
-
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
                       <CheckCircle2 size={14} />
                       Active
                     </span>
-
                   )}
-
                 </div>
-
               </div>
 
               <div>
-
                 <h3 className="mb-3 text-sm font-semibold text-text">
                   User Activity
                 </h3>
 
                 <div className="grid gap-3 sm:grid-cols-3">
-
                   <button
-                    onClick={() =>
-                      handleViewItems(selectedUser)
-                    }
+                    onClick={() => handleViewItems(selectedUser)}
                     className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-background p-5 text-center transition hover:border-primary/30 hover:bg-primary/5"
                   >
-
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                       <Package size={21} />
                     </div>
 
                     <div>
-
-                      <p className="font-semibold text-text">
-                        Items
-                      </p>
-
+                      <p className="font-semibold text-text">Items</p>
                       <p className="mt-1 text-xs text-muted">
                         View user's items
                       </p>
-
                     </div>
-
                   </button>
 
                   <button
-                    onClick={() =>
-                      handleViewRequests(selectedUser)
-                    }
+                    onClick={() => handleViewRequests(selectedUser)}
                     className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-background p-5 text-center transition hover:border-primary/30 hover:bg-primary/5"
                   >
-
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                       <ClipboardList size={21} />
                     </div>
 
                     <div>
-
-                      <p className="font-semibold text-text">
-                        Requests
-                      </p>
-
+                      <p className="font-semibold text-text">Requests</p>
                       <p className="mt-1 text-xs text-muted">
                         View user's requests
                       </p>
-
                     </div>
-
                   </button>
 
                   <button
-                    onClick={() =>
-                      handleViewReviews(selectedUser)
-                    }
+                    onClick={() => handleViewReviews(selectedUser)}
                     className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-background p-5 text-center transition hover:border-primary/30 hover:bg-primary/5"
                   >
-
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
                       <Star size={21} />
                     </div>
 
                     <div>
-
-                      <p className="font-semibold text-text">
-                        Reviews
-                      </p>
-
+                      <p className="font-semibold text-text">Reviews</p>
                       <p className="mt-1 text-xs text-muted">
                         View user's reviews
                       </p>
-
                     </div>
-
                   </button>
-
                 </div>
-
               </div>
-
             </div>
           </div>
         </div>
       )}
 
+      {/* Delete User Modal */}
       {showDeleteModal && userToDelete && (
-
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-
           <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl">
-
             <div className="flex items-start gap-4">
-
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-danger/10">
                 <AlertTriangle
                   size={23}
@@ -1089,7 +870,6 @@ export default function AdminUsers() {
               </div>
 
               <div>
-
                 <h2 className="text-lg font-bold text-text">
                   Delete User
                 </h2>
@@ -1101,13 +881,10 @@ export default function AdminUsers() {
                   </span>
                   ? This action cannot be undone.
                 </p>
-
               </div>
-
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
-
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
@@ -1124,7 +901,6 @@ export default function AdminUsers() {
                 disabled={actionLoading}
                 className="inline-flex items-center gap-2 rounded-xl bg-danger px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
               >
-
                 {actionLoading && (
                   <Loader2
                     size={16}
@@ -1133,15 +909,11 @@ export default function AdminUsers() {
                 )}
 
                 Delete User
-
               </button>
-
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }
