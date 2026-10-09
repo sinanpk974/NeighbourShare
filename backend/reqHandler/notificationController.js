@@ -224,3 +224,71 @@ export async function getUnreadNotificationCount(
     });
   }
 }
+
+import jwt from "jsonwebtoken";
+
+export async function getRegistrationNotifications(req, res) {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).send({
+        success: false,
+        message: "Registration status token is required",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    let decoded;
+
+    try {
+      decoded = jwt.verify(
+        token,
+        process.env.REGISTRATION_STATUS_SECRET
+      );
+    } catch {
+      return res.status(401).send({
+        success: false,
+        message: "Invalid or expired registration status token",
+      });
+    }
+
+    if (
+      decoded.purpose !== "registration-status" ||
+      !decoded.userId
+    ) {
+      return res.status(401).send({
+        success: false,
+        message: "Invalid registration status token",
+      });
+    }
+
+    const notifications = await notificationSchemaModel
+      .find({
+        recipient: decoded.userId,
+        type: {
+          $in: [
+            "USER_VERIFIED",
+            "USER_REJECTED",
+            "USER_BLOCKED",
+            "USER_UNBLOCKED",
+          ],
+        },
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).send({
+      success: true,
+      count: notifications.length,
+      notifications,
+    });
+  } catch (error) {
+    console.error("Registration notifications error:", error);
+
+    return res.status(500).send({
+      success: false,
+      message: "Failed to fetch registration notifications",
+    });
+  }
+}

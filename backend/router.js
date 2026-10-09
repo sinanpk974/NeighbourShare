@@ -45,6 +45,7 @@ router.route("/review/:requestId/:type").get(Auth, rj.getReviewByRequest);
 router.route("/reviewById/:reviewId").get(Auth, rj.getReviewById);
 router.route("/reviewsByRequest/:requestId").get(Auth, rj.getReviewsByRequest);
 
+router.get("/notifications/registration-status",rk.getRegistrationNotifications);
 router.get("/notifications",Auth,rk.getNotifications);
 router.get("/notifications/unread-count",Auth,rk.getUnreadNotificationCount);
 router.patch("/notifications/read-all",Auth,rk.markAllNotificationsAsRead);

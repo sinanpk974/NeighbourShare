@@ -5,6 +5,7 @@ import requestSchema from "../model/requestmodel.js"
 import notificationSchema from "../model/notificationmodel.js"
 import bcrypt from 'bcrypt'
 import pkg from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 import { createNotification } from "./notificationController.js";
 import cloudinary from "../config/cloudinary.js";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
@@ -22,6 +23,7 @@ export async function Register(req, res) {
       address,
     } = req.body;
 
+    // Validate required fields
     if (
       !name ||
       !email ||
@@ -31,20 +33,25 @@ export async function Register(req, res) {
       !address
     ) {
       return res.status(400).send({
+        success: false,
         msg: "All fields are required",
       });
     }
 
+    // Check whether the email already exists
     const existingUser = await userSchema.findOne({ email });
 
     if (existingUser) {
       return res.status(409).send({
+        success: false,
         msg: "Email already exists",
       });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create new user
     const newUser = await userSchema.create({
       name,
       email,
@@ -54,6 +61,7 @@ export async function Register(req, res) {
       address,
     });
 
+    // Notify all admins about the new registration
     const admins = await userSchema.find({
       role: "admin",
     });
@@ -68,15 +76,36 @@ export async function Register(req, res) {
       });
     }
 
-    res.status(201).send({
+    // Create a separate token for checking registration notifications
+    if (!process.env.REGISTRATION_STATUS_SECRET) {
+      throw new Error(
+        "REGISTRATION_STATUS_SECRET is not configured"
+      );
+    }
+
+    const registrationStatusToken = jwt.sign(
+      {
+        userId: newUser._id.toString(),
+        purpose: "registration-status",
+      },
+      process.env.REGISTRATION_STATUS_SECRET,
+      {
+        expiresIn: "30d",
+      }
+    );
+
+    // Registration successful
+    return res.status(201).send({
+      success: true,
       msg: "Registration successful",
+      registrationStatusToken,
     });
-
   } catch (err) {
-    console.log("Register error:", err);
+    console.error("Register error:", err);
 
-    res.status(500).send({
-      msg: err.message,
+    return res.status(500).send({
+      success: false,
+      msg: "Registration failed. Please try again.",
     });
   }
 }

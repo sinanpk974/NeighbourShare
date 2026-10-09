@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -16,7 +17,10 @@ import {
   RefreshCw,
   ShieldCheck,
   XCircle,
+  Bell,
 } from "lucide-react";
+
+const API_URL = "https://neighbourshare-i2wq.onrender.com/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -31,11 +35,9 @@ function Register() {
   });
 
   const [registeredEmail, setRegisteredEmail] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
-
   const [error, setError] = useState("");
   const [registered, setRegistered] = useState(false);
 
@@ -57,18 +59,21 @@ function Register() {
     setError("");
   };
 
+  // ==========================================
+  // REGISTER USER
+  // ==========================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
 
     if (
-      !formData.name ||
-      !formData.email ||
+      !formData.name.trim() ||
+      !formData.email.trim() ||
       !formData.password ||
-      !formData.phone ||
-      !formData.village ||
-      !formData.address
+      !formData.phone.trim() ||
+      !formData.village.trim() ||
+      !formData.address.trim()
     ) {
       setError("Please fill in all fields.");
       return;
@@ -78,17 +83,29 @@ function Register() {
       setLoading(true);
 
       const response = await axios.post(
-        "https://neighbourshare-i2wq.onrender.com/api/register",
+        `${API_URL}/register`,
         formData
       );
 
       console.log("Registration response:", response.data);
 
-      // Keep the registered email for status checking
+      // Save the registration-status token for logged-out
+      // verification notifications.
+      if (response.data?.registrationStatusToken) {
+        sessionStorage.setItem(
+          "registrationStatusToken",
+          response.data.registrationStatusToken
+        );
+      } else {
+        console.warn(
+          "Registration succeeded, but no registration-status token was returned."
+        );
+      }
+
+      // Save the registered email for the existing status check.
       setRegisteredEmail(formData.email);
 
       setRegistered(true);
-
       setVerificationStatus("pending");
 
       setStatusMessage(
@@ -104,10 +121,11 @@ function Register() {
         address: "",
       });
     } catch (error) {
-      console.log("Registration error:", error);
+      console.error("Registration error:", error);
 
       setError(
         error.response?.data?.msg ||
+          error.response?.data?.message ||
           "Registration failed. Please try again."
       );
     } finally {
@@ -115,13 +133,17 @@ function Register() {
     }
   };
 
+  // ==========================================
+  // CHECK VERIFICATION STATUS
+  // ==========================================
+
   const checkVerificationStatus = async () => {
     try {
       setCheckingStatus(true);
       setError("");
 
       const response = await axios.post(
-        "https://neighbourshare-i2wq.onrender.com/api/check-verification",
+        `${API_URL}/check-verification`,
         {
           email: registeredEmail,
         }
@@ -132,16 +154,21 @@ function Register() {
         setStatusMessage(response.data.msg);
       }
     } catch (error) {
-      console.log("Verification status error:", error);
+      console.error("Verification status error:", error);
 
       setError(
         error.response?.data?.msg ||
+          error.response?.data?.message ||
           "Unable to check verification status."
       );
     } finally {
       setCheckingStatus(false);
     }
   };
+
+  // ==========================================
+  // REGISTRATION SUCCESS / STATUS SCREEN
+  // ==========================================
 
   if (registered) {
     const isVerified = verificationStatus === "verified";
@@ -152,7 +179,6 @@ function Register() {
       <main className="min-h-screen bg-background">
         <div className="mx-auto flex min-h-[calc(100vh-72px)] max-w-7xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
           <div className="w-full max-w-lg rounded-3xl bg-white p-7 text-center shadow-lg sm:p-10">
-
             {/* STATUS ICON */}
             <div
               className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ${
@@ -194,7 +220,7 @@ function Register() {
                 : "Your NeighbourShare account has been created successfully."}
             </p>
 
-            {/* EMAIL */}
+            {/* REGISTERED EMAIL */}
             <div className="mt-5 rounded-xl border border-border bg-background px-4 py-3">
               <p className="text-xs font-medium text-muted">
                 Registered email
@@ -216,7 +242,6 @@ function Register() {
               }`}
             >
               <div className="flex gap-4">
-
                 <div
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                     isVerified
@@ -250,7 +275,6 @@ function Register() {
                     {statusMessage}
                   </p>
                 </div>
-
               </div>
             </div>
 
@@ -286,12 +310,22 @@ function Register() {
               </button>
             )}
 
+            {/* VIEW NOTIFICATIONS */}
+            <button
+              type="button"
+              onClick={() => navigate("/notifications")}
+              className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-border bg-white px-5 text-sm font-semibold text-text transition hover:bg-background"
+            >
+              <Bell size={18} />
+              View notifications
+            </button>
+
             {/* LOGIN */}
             {isVerified && (
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+                className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
               >
                 <ShieldCheck size={18} />
                 Login to NeighbourShare
@@ -303,7 +337,7 @@ function Register() {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+                className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
               >
                 <Home size={18} />
                 Go to Home
@@ -322,25 +356,24 @@ function Register() {
                 </Link>
               </p>
             )}
-
           </div>
         </div>
       </main>
     );
   }
 
+  // ==========================================
+  // REGISTRATION FORM
+  // ==========================================
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto flex min-h-[calc(100vh-72px)] max-w-7xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
-
         <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-lg lg:grid-cols-2">
-
           {/* LEFT SIDE */}
           <div className="hidden bg-primary p-10 text-white lg:flex lg:flex-col lg:justify-between">
-
             <div>
               <div className="flex items-center gap-3">
-
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent">
                   <Home size={22} />
                 </div>
@@ -354,11 +387,9 @@ function Register() {
                     Share locally. Borrow confidently.
                   </p>
                 </div>
-
               </div>
 
               <div className="mt-16">
-
                 <p className="text-sm font-semibold text-accent">
                   JOIN YOUR COMMUNITY
                 </p>
@@ -373,12 +404,10 @@ function Register() {
                   Create your NeighbourShare account and become
                   part of a trusted local sharing community.
                 </p>
-
               </div>
             </div>
 
             <div className="rounded-2xl bg-white/10 p-5">
-
               <p className="text-sm font-medium">
                 Why join NeighbourShare?
               </p>
@@ -387,16 +416,12 @@ function Register() {
                 Connect with people in your village, share useful
                 items and borrow from neighbours you can trust.
               </p>
-
             </div>
-
           </div>
 
           {/* RIGHT SIDE */}
           <div className="p-6 sm:p-10">
-
             <div className="mb-8">
-
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <UserPlus size={24} />
               </div>
@@ -408,7 +433,6 @@ function Register() {
               <p className="mt-2 text-sm leading-6 text-muted">
                 Join your local community and start sharing.
               </p>
-
             </div>
 
             {/* ERROR */}
@@ -419,11 +443,7 @@ function Register() {
             )}
 
             {/* FORM */}
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-5"
-            >
-
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* NAME */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-text">
@@ -442,6 +462,7 @@ function Register() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter your full name"
+                    autoComplete="name"
                     className="h-12 w-full rounded-xl border border-border bg-background pl-11 pr-4 text-sm text-text outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
                 </div>
@@ -465,6 +486,7 @@ function Register() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
+                    autoComplete="email"
                     className="h-12 w-full rounded-xl border border-border bg-background pl-11 pr-4 text-sm text-text outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
                 </div>
@@ -488,13 +510,15 @@ function Register() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Create a password"
+                    autoComplete="new-password"
                     className="h-12 w-full rounded-xl border border-border bg-background pl-11 pr-12 text-sm text-text outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowPassword(!showPassword)
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
                     }
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-muted transition hover:text-primary"
                   >
@@ -525,6 +549,7 @@ function Register() {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Enter your phone number"
+                    autoComplete="tel"
                     className="h-12 w-full rounded-xl border border-border bg-background pl-11 pr-4 text-sm text-text outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
                 </div>
@@ -548,6 +573,7 @@ function Register() {
                     value={formData.village}
                     onChange={handleChange}
                     placeholder="Enter your village"
+                    autoComplete="address-level2"
                     className="h-12 w-full rounded-xl border border-border bg-background pl-11 pr-4 text-sm text-text outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
                 </div>
@@ -571,6 +597,7 @@ function Register() {
                     onChange={handleChange}
                     placeholder="Enter your full address"
                     rows="3"
+                    autoComplete="street-address"
                     className="w-full resize-none rounded-xl border border-border bg-background py-3 pl-11 pr-4 text-sm text-text outline-none transition placeholder:text-muted/70 focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
                 </div>
@@ -594,7 +621,6 @@ function Register() {
                   </>
                 )}
               </button>
-
             </form>
 
             {/* LOGIN */}
@@ -607,7 +633,6 @@ function Register() {
                 Login
               </Link>
             </p>
-
           </div>
         </div>
       </div>
