@@ -111,7 +111,9 @@ function App() {
           path="/itemDetails/:id"
           element={<ItemDetails />}
         />
-
+        <Route
+          path="/notifications"
+          element={<Notifications />}/>
 
         {/* ================= PROTECTED USER ROUTES ================= */}
 
@@ -151,9 +153,7 @@ function App() {
             path="/viewreview"
             element={<ViewReview />}
           />
-          <Route
-          path="/notifications"
-          element={<Notifications />}/>
+          
 
         </Route>
 
